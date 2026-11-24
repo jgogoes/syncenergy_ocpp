@@ -1,0 +1,59 @@
+name: Compatibility report
+description: Tell us how this integration works with your Sync Energy / BG Sync charger.
+title: "[Compatibility] "
+labels: ["compatibility"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thank you for helping. Every report adds a charger to the compatibility table.
+
+        To get the diagnostics file: in Home Assistant, open the charger's device page (or the OCPP integration entry), select **⋮ → Download diagnostics**. The file contains no charge point id, serial number or password.
+  - type: input
+    id: model
+    attributes:
+      label: Charger model
+      description: As printed on the label, or the value of `sensor.<charger>_model`.
+      placeholder: EVWC2T7G-03
+    validations:
+      required: true
+  - type: input
+    id: firmware
+    attributes:
+      label: Firmware version
+      description: The value of `sensor.<charger>_version_firmware`.
+    validations:
+      required: false
+  - type: dropdown
+    id: result
+    attributes:
+      label: How well does it work?
+      options:
+        - Everything I tried works
+        - Charging works, some controls do not
+        - Charging does not work
+    validations:
+      required: true
+  - type: checkboxes
+    id: controls
+    attributes:
+      label: Which Sync controls appeared?
+      options:
+        - label: Indicator LED Brightness
+        - label: Charge When Plugged In (No Server Required)
+        - label: Enable CT Clamp
+        - label: None of them
+  - type: textarea
+    id: diagnostics
+    attributes:
+      label: Diagnostics file
+      description: Drag the downloaded diagnostics file here.
+    validations:
+      required: false
+  - type: textarea
+    id: notes
+    attributes:
+      label: Anything else?
+      description: What did not work, other apps you use with the charger, etc.
+    validations:
+      required: false

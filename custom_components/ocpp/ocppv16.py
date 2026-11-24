@@ -69,7 +69,7 @@ from .const import (
     DOMAIN,
     HA_ENERGY_UNIT,
     MEASURANDS,
-    SYNCEV_VENDOR_KEY_MODELS,
+    SYNCEV_VENDOR_KEYS,
     STATION_MAX_PROFILE_ABSOLUTE_START,
 )
 
@@ -780,15 +780,39 @@ class ChargePoint(cp):
             # notification for it on every single connect.
             notify_on_readonly=False,
         )
-        # BG Sync fork: SyncEV chargers reset the indicator LED to full
-        # brightness on power-cycle. LightIntensity is a standard OCPP key but
-        # this charger omits it from GetConfiguration, so it must be set by
-        # name. Reasserted on every connect because reboots are rare and any
-        # day/night automation self-corrects at the next sunrise or sunset.
-        # Gated on model: other chargers may not have the key at all.
-        model_metric = self._metrics.get((0, cdet.model.value))
-        model_value = model_metric.value if model_metric is not None else None
-        if model_value in SYNCEV_VENDOR_KEY_MODELS:
+
+    async def apply_vendor_configuration(self):
+        """Find the Sync-specific keys this charger has, and apply defaults.
+
+        BG Sync fork: each key in SYNCEV_VENDOR_KEYS is requested by name, one
+        at a time. A key the charger returns is recorded in vendor_keys and its
+        entity is offered; a key it reports unknown, or that times out, is not.
+        Nothing is sent to a charger that is not detected as Sync hardware.
+
+        SyncEV chargers reset the indicator LED to full brightness on
+        power-cycle, so LightIntensity is reasserted on every connect when the
+        charger has it. Reboots are rare and any day/night automation
+        self-corrects at the next sunrise or sunset.
+        """
+        found: set[str] = set()
+        if self.is_sync_charger:
+            for key in SYNCEV_VENDOR_KEYS:
+                try:
+                    resp = await self.call(call.GetConfiguration(key=[key]))
+                except asyncio.CancelledError:
+                    raise
+                except Exception as ex:
+                    _LOGGER.debug("'%s' vendor key %s not read: %s", self.id, key, ex)
+                    continue
+                returned = {
+                    entry.get("key") for entry in (resp.configuration_key or [])
+                }
+                if key in returned:
+                    found.add(key)
+            _LOGGER.debug("'%s' Sync vendor keys found: %s", self.id, sorted(found))
+        self.vendor_keys = found
+
+        if ckey.light_intensity.value in found:
             try:
                 await self.configure(
                     ckey.light_intensity.value,

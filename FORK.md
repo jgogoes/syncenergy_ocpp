@@ -63,10 +63,10 @@ independent causes:
 | `number.*_upper_limit_protection_voltage` | `UpperLimitProtectionVoltage` | |
 | `number.*_connection_timeout` | `ConnectionTimeOut` | |
 | `number.*_meter_value_sample_interval` | `MeterValueSampleInterval` | |
-| `number.*_light_intensity` | `LightIntensity` | model-gated; hidden key |
+| `number.*_light_intensity` | `LightIntensity` | Sync only, shown when the charger has the key; hidden key |
 | `switch.*_unlock_connector_on_ev_side_disconnect` | `UnlockConnectorOnEVSideDisconnect` | |
-| `switch.*_get_ct_clamp_value` | `GetCTClampValue` | genuinely starts/stops the stream |
-| `switch.*_charge_on_plug_in` | `ChargerMode` | model-gated; see below |
+| `switch.*_get_ct_clamp_value` | `GetCTClampValue` | Sync only, shown when the charger has the key; genuinely starts/stops the stream |
+| `switch.*_charge_on_plug_in` | `ChargerMode` | Sync only, shown when the charger has the key; see below |
 | `sensor.*_current_ctclamp` / `_voltage_ctclamp` | — | parsed from a vendor `DataTransfer` |
 
 Sensors are given readable names, and metrics the charger cannot report are
@@ -110,7 +110,12 @@ Kept on top of upstream:
 
 - Sync chargers use `reported_max - 1` as the stack level without the
   `stack_level_below_max` option (the charger rejects the reported maximum).
-  The charger is recognised by vendor, or by a model in `SYNCEV_VENDOR_KEY_MODELS`.
+  The charger is recognised by vendor, or by a model family in
+  `SYNCEV_KNOWN_MODELS` (a `-NN` revision suffix is ignored).
+- Sync-only entities (`LightIntensity`, `ChargerMode`, `GetCTClampValue`) are
+  offered only when the charger returns the key. On connect each key is asked
+  for by name, one at a time, because the EVSC7S leaves `LightIntensity` out of
+  its full `GetConfiguration` dump. Nothing extra is sent to a non-Sync charger.
 - Limits are rounded to one decimal place (OCPP `multipleOf 0.1`).
 - Whole-amp no-op suppression on the slider, for Sync chargers only.
 - Non-fatal `set_standard_configuration`, and no `set_availability` during an

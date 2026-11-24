@@ -49,7 +49,8 @@ from .enums import (
 )
 
 from .const import (
-    SYNCEV_VENDOR_KEY_MODELS,
+    SYNCEV_KNOWN_MODELS,
+    SYNCEV_VENDOR_NAMES,
     CentralSystemSettings,
     ChargerSystemSettings,
     CONF_AUTH_LIST,
@@ -94,6 +95,19 @@ _PHASE_KEY_GROUPS = (
 SESSION_ENERGY_DETECT_TOLERANCE = 0.01  # kWh
 
 SESSION_PROFILE_BASE_ID = 3000
+
+
+def _model_family(model) -> str:
+    """Return a charger model without case or a "-NN" revision suffix.
+
+    BG Sync fork: Sync part numbers carry a revision ("EVWC2T7G-03",
+    "EVT77G-02"). The charger may report the model with or without it.
+    """
+    family = str(model or "").strip().upper()
+    head, sep, tail = family.rpartition("-")
+    if sep and head and tail.isdigit():
+        return head
+    return family
 
 
 def session_profile_id(connector_id: int) -> int:
@@ -316,6 +330,9 @@ class ChargePoint(cp):
         # Home Assistant started. A charger that accepted one at a level does
         # not refuse that level, so a later refusal there has another cause.
         self._accepted_stack_levels: set[int] = set()
+        # BG Sync fork: Sync-specific configuration keys the charger returned
+        # when asked by name on connect (see apply_vendor_configuration).
+        self.vendor_keys: set[str] = set()
         self.preparing = asyncio.Event()
         self.active_transaction_id: int = 0
         self.triggered_boot_notification = False
@@ -455,6 +472,20 @@ class ChargePoint(cp):
                     "post_connect: set_standard_configuration failed non-fatally: %s",
                     ex,
                 )
+
+            # BG Sync fork: find the Sync-specific keys this charger has, so
+            # their entities are offered only where they work. Non-fatal for
+            # the same reason as set_standard_configuration above.
+            try:
+                await self.apply_vendor_configuration()
+            except asyncio.CancelledError:
+                raise
+            except Exception as ex:
+                _LOGGER.debug(
+                    "post_connect: apply_vendor_configuration failed non-fatally: %s",
+                    ex,
+                )
+            async_dispatcher_send(self.hass, DATA_UPDATED)
 
             self.post_connect_success = True
             _LOGGER.debug("'%s' post connection setup completed successfully", self.id)
@@ -953,15 +984,33 @@ class ChargePoint(cp):
         """Return True for a Sync Energy / BG Sync EV charger.
 
         BG Sync fork: matched on the reported vendor (the EVSC7S reports
-        "Sync Energy"), with the known model list as a second check.
+        "Sync Energy"), then on the known model families, ignoring case and a
+        "-NN" revision suffix.
         """
-        vendor = self._metrics[(0, cdet.vendor.value)].value
+        vendor_metric = self._metrics.get((0, cdet.vendor.value))
+        vendor = vendor_metric.value if vendor_metric is not None else None
         normalized = str(vendor or "").strip().casefold()
-        if any(m in normalized for m in ("sync energy", "sync ev", "syncev")):
+        if any(name in normalized for name in SYNCEV_VENDOR_NAMES):
             return True
         model_metric = self._metrics.get((0, cdet.model.value))
         model = model_metric.value if model_metric is not None else None
-        return model in SYNCEV_VENDOR_KEY_MODELS
+        return _model_family(model) in SYNCEV_KNOWN_MODELS
+
+    def has_vendor_key(self, key: str) -> bool:
+        """Return True if this Sync charger returned the vendor key on connect.
+
+        BG Sync fork: entities for Sync-specific configuration keys are
+        offered only when both hold, so a charger without a key never shows a
+        control that cannot work.
+        """
+        return self.is_sync_charger and key in getattr(self, "vendor_keys", set())
+
+    async def apply_vendor_configuration(self):
+        """Find the Sync-specific keys this charger has, and apply defaults.
+
+        Overridden per OCPP version. The base charger has none.
+        """
+        self.vendor_keys = set()
 
     @property
     def requires_abrupt_disconnect(self) -> bool:

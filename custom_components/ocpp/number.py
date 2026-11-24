@@ -46,9 +46,8 @@ from .const import (
     DEFAULT_SESSION_LIMIT_DEFAULT_PROFILE,
     DOMAIN,
     ICON,
-    SYNCEV_VENDOR_KEY_MODELS,
 )
-from .enums import HAChargerDetails, Profiles
+from .enums import Profiles
 
 MAX_SESSION_CONNECTORS = 10
 _TX_DEFAULT_PROFILE = "TxDefaultProfile"
@@ -65,9 +64,9 @@ class OcppNumberDescription(NumberEntityDescription):
     ocpp_key: str | None = None
     # NumberMode.BOX gives a plain input instead of a slider.
     mode: NumberMode | None = None
-    # Only offered on chargers whose reported model is in
-    # SYNCEV_VENDOR_KEY_MODELS.
-    model_gated: bool = False
+    # BG Sync fork: a Sync-specific key. Offered only on a Sync charger that
+    # returned the key when asked by name on connect (ChargePoint.has_vendor_key).
+    vendor_key: bool = False
 
 
 def _quantise_rate(value: float) -> float:
@@ -160,7 +159,7 @@ NUMBERS: Final = [
         native_unit_of_measurement=PERCENTAGE,
         ocpp_key="LightIntensity",
         mode=NumberMode.BOX,
-        model_gated=True,
+        vendor_key=True,
     ),
 ]
 
@@ -282,7 +281,7 @@ async def async_setup_entry(hass, entry, async_add_devices):
                         native_unit_of_measurement=desc.native_unit_of_measurement,
                         ocpp_key=desc.ocpp_key,
                         mode=desc.mode,
-                        model_gated=desc.model_gated,
+                        vendor_key=desc.vendor_key,
                     ),
                     connector_id=None,
                     op_connector_id=0,
@@ -433,11 +432,11 @@ class ChargePointNumber(RestoreNumber, NumberEntity):
     @property
     def available(self) -> bool:
         """Return if entity is available."""
-        if self.entity_description.model_gated:
-            model = self.central_system.get_metric(
-                self.cpid, HAChargerDetails.model.value
+        if self.entity_description.vendor_key:
+            cp = self.central_system.charge_points.get(
+                self.central_system.cpids.get(self.cpid, self.cpid)
             )
-            if model not in SYNCEV_VENDOR_KEY_MODELS:
+            if cp is None or not cp.has_vendor_key(self.entity_description.ocpp_key):
                 return False
         if self.entity_description.ocpp_key:
             # Config keys need only a live connection, not smart charging.

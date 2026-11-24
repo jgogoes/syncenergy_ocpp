@@ -92,13 +92,18 @@ DEFAULT_IDLE_INTERVAL = 900
 # the EVSC7S, 2026-08-10 (30 and 100 both accepted and read back).
 DEFAULT_LIGHT_INTENSITY = 100
 
-# charge_point_model strings (as reported in BootNotification, exposed via
-# sensor.<cpid>_model) on which the vendor-proprietary keys below are expected
-# to exist. EVSC7S is confirmed on real hardware; the rest are other models in
-# the same Sync Energy range that share the config-key vocabulary but have not
-# been individually tested. Only vendor-specific behaviour is gated on this --
-# standard OCPP features are never gated.
-SYNCEV_VENDOR_KEY_MODELS = [
+# How a charger is recognised as Sync Energy hardware, so that the Sync-specific
+# behaviour in this fork applies to it, with nothing for the user to set.
+#
+# Detection matches the chargePointVendor from BootNotification first. The
+# EVSC7S reports "Sync Energy". Matching is a case-insensitive substring test.
+SYNCEV_VENDOR_NAMES = ("sync energy", "sync ev", "syncev")
+# Fallback for a Sync charger whose vendor string does not match: the model
+# family, compared without case and without a "-NN" revision suffix (so
+# "EVWC2T7G-03" matches "EVWC2T7G"). EVSC7S is confirmed on real hardware.
+# EVWC2T7G is reported working by a user (discussion #12). The others are in
+# the same range and not individually tested.
+SYNCEV_KNOWN_MODELS = [
     "EVSC7S",
     "EVL7PS",
     "EVL7PSG",
@@ -108,7 +113,16 @@ SYNCEV_VENDOR_KEY_MODELS = [
     "EVLR7MSG",
     "EVLS7MS",
     "EVLS7MSG",
+    "EVT77G",
+    "EVT77GG",
+    "EVWC2T7G",
+    "EVWC2T7GG",
 ]
+# Sync-specific configuration keys behind optional entities. On connect each
+# key is requested from the charger by name, and its entity is offered only if
+# the charger returns it. Requested one at a time and by name: the EVSC7S omits
+# LightIntensity from its full GetConfiguration dump but answers for it by name.
+SYNCEV_VENDOR_KEYS = ("LightIntensity", "ChargerMode", "GetCTClampValue")
 
 # Control granularity of the charger, in Amps.
 #

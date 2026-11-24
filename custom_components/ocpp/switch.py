@@ -27,9 +27,8 @@ from .const import (
     DATA_UPDATED,
     DOMAIN,
     ICON,
-    SYNCEV_VENDOR_KEY_MODELS,
 )
-from .enums import HAChargerDetails, HAChargerServices, HAChargerStatuses
+from .enums import HAChargerServices, HAChargerStatuses
 
 _LOGGER: logging.Logger = logging.getLogger(__package__)
 
@@ -57,9 +56,9 @@ class OcppSwitchDescription(SwitchEntityDescription):
     # _apply_readback: such a key cannot be reconciled from a read, so the
     # commanded value is authoritative and raw_value carries what was reported.
     ocpp_readback_ambiguous: bool = False
-    # Only offered on chargers whose reported model is in
-    # SYNCEV_VENDOR_KEY_MODELS -- for vendor keys not present on every charger.
-    model_gated: bool = False
+    # BG Sync fork: a Sync-specific key. Offered only on a Sync charger that
+    # returned the key when asked by name on connect (ChargePoint.has_vendor_key).
+    vendor_key: bool = False
     single_connector_status_fallback: bool = False
     # The switch acts on the connector's transaction, so it is unavailable
     # while that transaction's state is held as unresolved (see ocppv16).
@@ -133,6 +132,7 @@ SWITCHES: Final[list[OcppSwitchDescription]] = [
         ocpp_key="GetCTClampValue",
         ocpp_on_value="1",
         ocpp_off_value="0",
+        vendor_key=True,
     ),
     OcppSwitchDescription(
         key="charge_on_plug_in",
@@ -157,7 +157,7 @@ SWITCHES: Final[list[OcppSwitchDescription]] = [
         ocpp_on_value="3",
         ocpp_off_value="1",
         ocpp_readback_ambiguous=True,
-        model_gated=True,
+        vendor_key=True,
     ),
 ]
 
@@ -317,12 +317,8 @@ class ChargePointSwitch(SwitchEntity):
     @property
     def available(self) -> bool:
         """Return if switch is available."""
-        if self.entity_description.model_gated:
-            model = self.central_system.get_metric(
-                self.cpid, HAChargerDetails.model.value
-            )
-            if model not in SYNCEV_VENDOR_KEY_MODELS:
-                return False
+        if self.entity_description.vendor_key and not self._has_vendor_key():
+            return False
         if self.entity_description.ocpp_key:
             # Config keys are charger-wide, never per-connector.
             return bool(self.central_system.get_available(self.cpid, None))
@@ -434,6 +430,13 @@ class ChargePointSwitch(SwitchEntity):
         cp_id = self.central_system.cpids.get(self.cpid, self.cpid)
         return self.central_system.charge_points.get(cp_id)
 
+    def _has_vendor_key(self) -> bool:
+        """Return True if the charger has this entity's Sync-specific key."""
+        cp = self._resolve_cp()
+        return bool(
+            cp is not None and cp.has_vendor_key(self.entity_description.ocpp_key)
+        )
+
     def _schedule_ocpp_refresh(self) -> None:
         """Run a read-back as a background task that is cancelled on removal.
 
@@ -461,6 +464,10 @@ class ChargePointSwitch(SwitchEntity):
         try:
             cp = self._resolve_cp()
             if cp is None:
+                return
+            # A Sync-specific key is read only once the charger has shown it
+            # has the key: asking for an unknown key raises an HA notification.
+            if self.entity_description.vendor_key and not self._has_vendor_key():
                 return
             actual = await cp.get_configuration(self.entity_description.ocpp_key)
             self._apply_readback(actual)

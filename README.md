@@ -65,12 +65,30 @@ they will overwrite each other.
 
 ## Will this work on my charger?
 
-Vendor-specific features are gated on the model the charger reports, so on
-non-SyncEV hardware they simply do not appear. The charging-profile fixes are
-general and should be safe anywhere, though only EVSC7S has been tested.
+You do not need to edit any files. On connect the integration checks if the
+charger is Sync Energy hardware, and turns on the Sync fixes and controls
+automatically:
 
-Confirmed on **EVSC7S**. Expected to apply to other Sync Energy models
-(`EVL7PS`, `EVL7MS`, `EVLR7MS`, `EVLS7MS` and their G variants) — untested.
+- **Detection:** the vendor the charger reports (the EVSC7S reports
+  `Sync Energy`), or a known Sync model family. A revision suffix such as
+  `-02` or `-03` is ignored.
+- **Controls:** each Sync-only control (LED brightness, Charge When Plugged In,
+  Enable CT Clamp) appears only if your charger has that setting.
+
+On non-Sync hardware the Sync controls do not appear and no extra requests are
+sent. The charging-profile fixes are general.
+
+| Model | Status |
+|---|---|
+| EVSC7S | Confirmed (developed and measured on it) |
+| EVWC2T7G | Reported working by a user |
+| EVT77G, EVT77GG, EVWC2T7GG, EVL7PS(G), EVL7MS(G), EVLR7MS(G), EVLS7MS(G) | Expected to work, untested |
+
+**Sync charger not detected, or not in the table?** Please help by sending a
+[compatibility report](https://github.com/jgogoes/hass_ocpp_bg_sync_ev/issues/new?template=compatibility.yml).
+It takes two minutes: on the charger's device page (or the OCPP integration entry), select
+**⋮ → Download diagnostics** and attach the file. The diagnostics file
+contains no charge point id, serial number or password.
 
 ## Documentation
 
