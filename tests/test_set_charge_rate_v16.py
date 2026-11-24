@@ -21,18 +21,18 @@ from ocpp.v16.enums import (
     Measurand,
 )
 
-from custom_components.ocpp.chargepoint import (
+from custom_components.sync_energy_ocpp.chargepoint import (
     Metric,
     _ConnectorAwareMetrics,
 )
-from custom_components.ocpp.const import DEFAULT_MAX_CURRENT
-from custom_components.ocpp.enums import (
+from custom_components.sync_energy_ocpp.const import DEFAULT_MAX_CURRENT
+from custom_components.sync_energy_ocpp.enums import (
     ConfigurationKey as ckey,
     HAChargerSession as csess,
     OcppMisc as om,
     Profiles as prof,
 )
-from custom_components.ocpp.ocppv16 import (
+from custom_components.sync_energy_ocpp.ocppv16 import (
     ChargePoint as ChargePointv16,
     _allowed_charging_rate_units,
 )

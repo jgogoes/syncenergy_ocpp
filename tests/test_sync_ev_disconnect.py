@@ -5,9 +5,9 @@ from unittest.mock import AsyncMock, MagicMock
 import pytest
 from websockets.protocol import State
 
-from custom_components.ocpp import _abort_sync_charge_points
-from custom_components.ocpp.chargepoint import ChargePoint
-from custom_components.ocpp.enums import HAChargerDetails as cdet
+from custom_components.sync_energy_ocpp import _abort_sync_charge_points
+from custom_components.sync_energy_ocpp.chargepoint import ChargePoint
+from custom_components.sync_energy_ocpp.enums import HAChargerDetails as cdet
 
 
 def _charge_point_with_vendor(vendor: str | None) -> ChargePoint:

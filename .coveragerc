@@ -1,6 +1,6 @@
 [run]
 branch = False
-source = custom_components/ocpp
+source = custom_components/sync_energy_ocpp
 
 [report]
 exclude_lines =

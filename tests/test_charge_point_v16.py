@@ -15,17 +15,17 @@ from homeassistant.const import STATE_ON, UnitOfTime
 from homeassistant.exceptions import HomeAssistantError
 import websockets
 
-from custom_components.ocpp.api import CentralSystem
-from custom_components.ocpp.button import BUTTONS
-from custom_components.ocpp.chargepoint import Metric as M
-from custom_components.ocpp.sensor import DISABLED_BY_DEFAULT_METRICS
-from custom_components.ocpp.const import (
+from custom_components.sync_energy_ocpp.api import CentralSystem
+from custom_components.sync_energy_ocpp.button import BUTTONS
+from custom_components.sync_energy_ocpp.chargepoint import Metric as M
+from custom_components.sync_energy_ocpp.sensor import DISABLED_BY_DEFAULT_METRICS
+from custom_components.sync_energy_ocpp.const import (
     DOMAIN as OCPP_DOMAIN,
     CONF_CPIDS,
     CONF_CPID,
     CONF_NUM_CONNECTORS,
 )
-from custom_components.ocpp.enums import (
+from custom_components.sync_energy_ocpp.enums import (
     ConfigurationKey as ckey,
     HAChargerDetails as cdet,
     HAChargerServices as csvcs,
@@ -33,9 +33,9 @@ from custom_components.ocpp.enums import (
     HAChargerStatuses as cstat,
     Profiles as prof,
 )
-from custom_components.ocpp.number import NUMBERS
-from custom_components.ocpp.switch import SWITCHES
-from custom_components.ocpp.ocppv16 import ChargePoint as ServerCP
+from custom_components.sync_energy_ocpp.number import NUMBERS
+from custom_components.sync_energy_ocpp.switch import SWITCHES
+from custom_components.sync_energy_ocpp.ocppv16 import ChargePoint as ServerCP
 from ocpp.routing import on
 from ocpp.v16 import ChargePoint as cpclass, call, call_result
 from ocpp.v16.enums import (
@@ -1404,7 +1404,7 @@ async def test_api_get_extra_attr_fallback_to_later_connectors(
         srv = cs.charge_points[cp_id]
         cpid = srv.settings.cpid
 
-        from custom_components.ocpp.chargepoint import Metric as M
+        from custom_components.sync_energy_ocpp.chargepoint import Metric as M
 
         meas = "Energy.Active.Import.Register"
 
@@ -1591,7 +1591,7 @@ async def test_monitor_connection_timeout_branch(
 
         srv_cp = cs.charge_points[cp_id]
 
-        from custom_components.ocpp import chargepoint as cp_mod
+        from custom_components.sync_energy_ocpp import chargepoint as cp_mod
 
         monkeypatch.setattr(
             cp_mod,
@@ -1663,7 +1663,7 @@ async def test_get_authorization_status_with_auth_list(
     """Exercise ChargePoint.get_authorization_status() when an auth_list is configured."""
     cs: CentralSystem = setup_config_entry
 
-    from custom_components.ocpp.const import (
+    from custom_components.sync_energy_ocpp.const import (
         DOMAIN,
         CONFIG,
         CONF_DEFAULT_AUTH_STATUS,
@@ -3331,7 +3331,7 @@ async def test_post_connect_fetch_supported_features_raises(
     cs: CentralSystem = setup_config_entry
 
     # Patch before connecting so our call to post_connect() hits the boom.
-    from custom_components.ocpp.ocppv16 import ChargePoint as ServerCP
+    from custom_components.sync_energy_ocpp.ocppv16 import ChargePoint as ServerCP
 
     async def boom(self):
         raise RuntimeError("fetch boom")
@@ -3434,7 +3434,7 @@ async def test_post_connect_set_availability_error_swallowed_and_REM_triggers_ca
     cs: CentralSystem = setup_config_entry
 
     # Patch server CP methods before connecting.
-    from custom_components.ocpp.ocppv16 import ChargePoint as ServerCP
+    from custom_components.sync_energy_ocpp.ocppv16 import ChargePoint as ServerCP
 
     async def ok_fetch(self):
         return None
@@ -3521,7 +3521,7 @@ async def test_post_connect_set_availability_cancelled_bubbles(
     """Inner try around set_availability: asyncio.CancelledError must be re-raised (not swallowed)."""
     cs: CentralSystem = setup_config_entry
 
-    from custom_components.ocpp.ocppv16 import ChargePoint as ServerCP
+    from custom_components.sync_energy_ocpp.ocppv16 import ChargePoint as ServerCP
 
     async def ok_fetch(self):
         return None
@@ -3589,7 +3589,7 @@ async def test_post_connect_trigger_boot_notification_raises_outer_caught(
     """Outer try: trigger_boot_notification raises -> swallowed; post_connect_success already True."""
     cs: CentralSystem = setup_config_entry
 
-    from custom_components.ocpp.ocppv16 import ChargePoint as ServerCP
+    from custom_components.sync_energy_ocpp.ocppv16 import ChargePoint as ServerCP
 
     async def ok_fetch(self):
         return None
@@ -3663,7 +3663,7 @@ async def test_post_connect_trigger_status_notification_raises_outer_caught(
     """Outer try: trigger_status_notification raises -> swallowed; post_connect_success already True."""
     cs: CentralSystem = setup_config_entry
 
-    from custom_components.ocpp.ocppv16 import ChargePoint as ServerCP
+    from custom_components.sync_energy_ocpp.ocppv16 import ChargePoint as ServerCP
 
     async def ok_fetch(self):
         return None
@@ -3742,7 +3742,7 @@ async def test_post_connect_update_entry_raises_outer_caught(
     """Outer try: async_update_entry raises -> swallowed, success flag not set."""
     cs: CentralSystem = setup_config_entry
 
-    from custom_components.ocpp.ocppv16 import ChargePoint as ServerCP
+    from custom_components.sync_energy_ocpp.ocppv16 import ChargePoint as ServerCP
 
     async def ok_fetch(self):
         return None
@@ -3808,7 +3808,7 @@ async def test_post_connect_set_standard_configuration_raises_outer_caught(
     """Outer try: set_standard_configuration raises -> swallowed, success flag not set."""
     cs: CentralSystem = setup_config_entry
 
-    from custom_components.ocpp.ocppv16 import ChargePoint as ServerCP
+    from custom_components.sync_energy_ocpp.ocppv16 import ChargePoint as ServerCP
 
     async def ok_fetch(self):
         return None
@@ -3869,7 +3869,7 @@ async def test_post_connect_number_of_connectors_raises_outer_caught(
     """Outer try: get_number_of_connectors raises -> swallowed, success flag not set."""
     cs: CentralSystem = setup_config_entry
 
-    from custom_components.ocpp.ocppv16 import ChargePoint as ServerCP
+    from custom_components.sync_energy_ocpp.ocppv16 import ChargePoint as ServerCP
 
     async def ok_fetch(self):
         return None

@@ -15,17 +15,20 @@ from homeassistant.helpers import template as template_helper
 from homeassistant.util.yaml.objects import NodeStrClass
 from websockets import NegotiationError
 
-from custom_components.ocpp.api import CHRGR_SERVICE_DATA_SCHEMA, CentralSystem
-from custom_components.ocpp.const import DOMAIN
-from custom_components.ocpp.enums import (
+from custom_components.sync_energy_ocpp.api import (
+    CHRGR_SERVICE_DATA_SCHEMA,
+    CentralSystem,
+)
+from custom_components.sync_energy_ocpp.const import DOMAIN
+from custom_components.sync_energy_ocpp.enums import (
     HAChargerServices as csvcs,
     HAChargerSession as csess,
     HAChargerStatuses as cstat,
     Profiles as prof,
 )
-from custom_components.ocpp.chargepoint import Metric as M
-from custom_components.ocpp.chargepoint import SetVariableResult
-from custom_components.ocpp.switch import ChargePointSwitch, SWITCHES
+from custom_components.sync_energy_ocpp.chargepoint import Metric as M
+from custom_components.sync_energy_ocpp.chargepoint import SetVariableResult
+from custom_components.sync_energy_ocpp.switch import ChargePointSwitch, SWITCHES
 
 from tests.const import MOCK_CONFIG_DATA
 
@@ -627,7 +630,7 @@ async def test_legacy_custom_profile_logs_payload_free_debug(hass, caplog):
     transaction_id = "legacy-session"
     custom_profile = f"{{'id':2,'transactionId':'{transaction_id}'}}"
 
-    with caplog.at_level(logging.DEBUG, logger="custom_components.ocpp"):
+    with caplog.at_level(logging.DEBUG, logger="custom_components.sync_energy_ocpp"):
         await cs.handle_set_charge_rate(
             SimpleNamespace(data={"devid": "ok", "custom_profile": custom_profile})
         )
@@ -703,7 +706,9 @@ async def test_json_parser_limit_error_is_translated(hass, monkeypatch, error_ty
     def exceed_parser_limit(_custom_profile):
         raise error_type("parser detail must not reach the caller")
 
-    monkeypatch.setattr("custom_components.ocpp.api.json.loads", exceed_parser_limit)
+    monkeypatch.setattr(
+        "custom_components.sync_energy_ocpp.api.json.loads", exceed_parser_limit
+    )
 
     with pytest.raises(HomeAssistantError) as exc_info:
         await cs.handle_set_charge_rate(
@@ -738,7 +743,7 @@ async def test_legacy_json_parser_limit_error_is_translated(
         raise error_type("parser detail must not reach the caller")
 
     monkeypatch.setattr(
-        "custom_components.ocpp.api.json.loads", exceed_legacy_parser_limit
+        "custom_components.sync_energy_ocpp.api.json.loads", exceed_legacy_parser_limit
     )
 
     with pytest.raises(HomeAssistantError) as exc_info:
@@ -779,7 +784,7 @@ async def test_legacy_non_object_is_rejected_without_success_log(hass, caplog):
     cs, cp = _available_central_system(hass)
 
     with (
-        caplog.at_level(logging.DEBUG, logger="custom_components.ocpp"),
+        caplog.at_level(logging.DEBUG, logger="custom_components.sync_energy_ocpp"),
         pytest.raises(HomeAssistantError),
     ):
         await cs.handle_set_charge_rate(
@@ -883,7 +888,7 @@ async def test_pinned_version_overrides_server_preference(hass):
 @pytest.mark.asyncio
 async def test_resolve_subprotocols_auto_and_pinned(hass):
     """Pinning an OCPP version advertises only that version's subprotocol."""
-    from custom_components.ocpp.const import (
+    from custom_components.sync_energy_ocpp.const import (
         CentralSystemSettings,
         DEFAULT_SUBPROTOCOLS,
     )
@@ -1185,7 +1190,7 @@ async def test_multi_central_system_routing_via_global_resolver(hass):
     _resolve_central_system must route a devid to exactly the CS that owns
     the charger.
     """
-    from custom_components.ocpp import _resolve_central_system
+    from custom_components.sync_energy_ocpp import _resolve_central_system
 
     entry_a = MockConfigEntry(domain=DOMAIN, data=MOCK_CONFIG_DATA.copy())
     entry_b = MockConfigEntry(domain=DOMAIN, data=MOCK_CONFIG_DATA.copy())
@@ -1217,7 +1222,7 @@ async def test_multi_central_system_routing_via_global_resolver(hass):
 @pytest.mark.asyncio
 async def test_empty_devid_resolves_to_only_central_system(hass):
     """Backwards compatibility: empty devid resolves when only one CS is loaded."""
-    from custom_components.ocpp import _resolve_central_system
+    from custom_components.sync_energy_ocpp import _resolve_central_system
 
     entry = MockConfigEntry(domain=DOMAIN, data=MOCK_CONFIG_DATA.copy())
     cs = CentralSystem(hass, entry)
@@ -1233,7 +1238,10 @@ async def test_empty_devid_resolves_to_only_central_system(hass):
 @pytest.mark.asyncio
 async def test_unload_preserves_services_while_second_cs_active(hass):
     """Unloading one entry must not remove domain services while a second is still active."""
-    from custom_components.ocpp import _resolve_central_system, _DOMAIN_SERVICE_NAMES
+    from custom_components.sync_energy_ocpp import (
+        _resolve_central_system,
+        _DOMAIN_SERVICE_NAMES,
+    )
 
     hass.data.setdefault(DOMAIN, {})
 
@@ -1267,7 +1275,7 @@ async def test_duplicate_cp_id_across_central_systems_is_rejected(hass):
     mutating service call, so the resolver refuses and the user is expected to
     use their unique cpid instead.
     """
-    from custom_components.ocpp import _resolve_central_system
+    from custom_components.sync_energy_ocpp import _resolve_central_system
 
     entry_a = MockConfigEntry(domain=DOMAIN, data=MOCK_CONFIG_DATA.copy())
     entry_b = MockConfigEntry(domain=DOMAIN, data=MOCK_CONFIG_DATA.copy())
@@ -1297,7 +1305,7 @@ async def test_cpid_wins_over_a_colliding_cp_id(hass):
     cpid is kept unique by the config flow, cp_id is not, so the unique
     identifier has to be matched first regardless of load order.
     """
-    from custom_components.ocpp import _resolve_central_system
+    from custom_components.sync_energy_ocpp import _resolve_central_system
 
     entry_a = MockConfigEntry(domain=DOMAIN, data=MOCK_CONFIG_DATA.copy())
     entry_b = MockConfigEntry(domain=DOMAIN, data=MOCK_CONFIG_DATA.copy())
@@ -1464,7 +1472,7 @@ async def test_settings_ignore_keys_from_a_later_release(hass, monkeypatch):
     """A rollback must not fail a charger on a setting this release does not know."""
     from unittest.mock import AsyncMock
 
-    from custom_components.ocpp.const import CONF_CPIDS
+    from custom_components.sync_energy_ocpp.const import CONF_CPIDS
 
     from tests.const import MOCK_CONFIG_CP_APPEND
 

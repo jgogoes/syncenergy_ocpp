@@ -1,12 +1,37 @@
-![OCPP](https://github.com/home-assistant/brands/raw/master/custom_integrations/ocpp/icon.png)
+![OCPP for Sync Energy chargers](custom_components/sync_energy_ocpp/brand/icon.png)
 
-# OCPP - BG Sync EV
+# OCPP for Sync Energy chargers (BG SyncEV)
 
-A Home Assistant integration for EV chargers speaking OCPP, **forked for
-BG SyncEV / Sync Energy chargers**.
+A Home Assistant integration for **Sync Energy** EV chargers, also sold as
+**BG SyncEV** and **SyncEV**. It talks to the charger directly over OCPP, on
+your own network, with no cloud account needed.
 
-This is [lbbrhzn/ocpp](https://github.com/lbbrhzn/ocpp) with fixes for
-behaviour specific to SyncEV hardware. Everything upstream does, this does too.
+It is based on [lbbrhzn/ocpp](https://github.com/lbbrhzn/ocpp), with fixes and
+extra controls for Sync Energy hardware. Everything upstream does, this does too.
+
+> **This is a community project.** It is not made, endorsed or supported by
+> Sync Energy, BG Electrical or Luceco. Product names are used only to say
+> which chargers it works with.
+
+> **New name, new domain (version 2.0.0).** This project was called
+> "OCPP - BG Sync EV" and used the `ocpp` domain, the same as upstream. Two
+> integrations with the same domain cannot both be in the Home Assistant
+> Marketplace, so from 2.0.0 the domain is `sync_energy_ocpp`. This lets the
+> integration be listed in the Marketplace, and lets you install it next to
+> upstream. Existing users: see **[MIGRATION.md](MIGRATION.md)**. A guided
+> import keeps your settings and entity IDs.
+
+### New in 2.0.0
+
+- **Works with your Sync charger without file edits.** The charger is
+  recognised automatically from what it reports, including newer revisions
+  such as `-02` and `-03`.
+- **Only the controls your charger has.** LED brightness, Charge When Plugged
+  In and Enable CT Clamp appear only if your charger supports them. The CT
+  Clamp switch no longer appears on other chargers.
+- **One-click diagnostics** for support and compatibility reports, with no
+  charge point id, serial number or password in the file.
+- **Guided import** from the old `ocpp` setup.
 
 > Developed and measured against a **SyncEV EVSC7S** (firmware
 > `RD0045-V1.02-S1.01`) driven by evcc. Base: upstream **v0.12.3** (main at `c514238`).
@@ -51,17 +76,18 @@ that used to trip a `C1249 Too Many Wake-Up Requests` fault on a VW ID.3.
 
 ## Installing
 
-Via HACS:
+Until the Marketplace listing is approved, add it as a custom repository:
 
 1. HACS → three-dot menu → **Custom repositories**
 2. Add `https://github.com/jgogoes/hass_ocpp_bg_sync_ev`, type **Integration**
-3. Search for **BG Sync**, download, restart Home Assistant
+3. Search for **Sync Energy**, download it, then restart Home Assistant
+4. **Settings → Devices & services → Add integration → OCPP for Sync Energy chargers**
 
-Or copy `custom_components/ocpp/` into your `config/custom_components/` folder
-and restart.
+Or copy `custom_components/sync_energy_ocpp/` into your
+`config/custom_components/` folder and restart.
 
-⚠️ This uses the same `ocpp` domain as upstream, so **do not install both** —
-they will overwrite each other.
+Moving from the old `ocpp` domain (this project before 2.0.0, or upstream)?
+Follow **[MIGRATION.md](MIGRATION.md)**. Do not run both on the same port.
 
 ## Will this work on my charger?
 

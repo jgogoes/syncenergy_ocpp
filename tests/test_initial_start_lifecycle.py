@@ -8,8 +8,8 @@ from pytest_homeassistant_custom_component.common import MockConfigEntry
 from websockets.exceptions import ConnectionClosedOK
 from websockets.protocol import State
 
-from custom_components.ocpp.api import CentralSystem
-from custom_components.ocpp.const import DOMAIN
+from custom_components.sync_energy_ocpp.api import CentralSystem
+from custom_components.sync_energy_ocpp.const import DOMAIN
 
 from .const import MOCK_CONFIG_FLOW
 from .test_reconnect_lifecycle import Socket, ticks

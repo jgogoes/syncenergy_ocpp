@@ -15,7 +15,7 @@ from ocpp.v16.enums import (
     ConfigurationStatus,
 )
 
-from custom_components.ocpp.enums import (
+from custom_components.sync_energy_ocpp.enums import (
     HAChargerDetails as cdet,
     ConfigurationKey as ckey,
 )
@@ -783,7 +783,7 @@ async def test_eair_get_energy_kwh_exception_ignored(
             await wait_ready(cs.charge_points[cp_id])
 
             # Monkeypatch energy conversion to raise
-            from custom_components.ocpp.ocppv16 import cp as cp_mod
+            from custom_components.sync_energy_ocpp.ocppv16 import cp as cp_mod
 
             monkeypatch.setattr(
                 cp_mod,

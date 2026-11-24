@@ -11,14 +11,14 @@ from websockets.protocol import State
 from homeassistant.const import STATE_UNAVAILABLE
 from homeassistant.setup import async_setup_component
 
-from custom_components.ocpp.chargepoint import (
+from custom_components.sync_energy_ocpp.chargepoint import (
     ChargePoint,
     OcppVersion,
     Metric,
     _ConnectorAwareMetrics as CAM,
     MeasurandValue,
 )
-from custom_components.ocpp.const import (
+from custom_components.sync_energy_ocpp.const import (
     DEFAULT_ENABLE_HA_NOTIFICATIONS,
     DOMAIN,
     CentralSystemSettings,
@@ -28,7 +28,7 @@ from custom_components.ocpp.const import (
     HA_ENERGY_UNIT,
     HA_POWER_UNIT,
 )
-from custom_components.ocpp.enums import (
+from custom_components.sync_energy_ocpp.enums import (
     HAChargerDetails as cdet,
     HAChargerSession as csess,
 )

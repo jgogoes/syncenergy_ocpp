@@ -74,7 +74,7 @@ If your integration shows extra attributes on the connector status sensor like a
 
 ## Authorization events
 
-Every authorization decision fires an `ocpp_authorization` event, so automations can react to accepted and rejected tags, for example to notify you when an unknown card is presented. With OCPP 1.6 this includes tags the charger accepts from its own list, which skip Authorize and only arrive with StartTransaction.
+Every authorization decision fires an `sync_energy_ocpp_authorization` event, so automations can react to accepted and rejected tags, for example to notify you when an unknown card is presented. With OCPP 1.6 this includes tags the charger accepts from its own list, which skip Authorize and only arrive with StartTransaction.
 
 The event data contains:
 
@@ -86,7 +86,7 @@ The event data contains:
 ```yaml
 triggers:
   - trigger: event
-    event_type: ocpp_authorization
+    event_type: sync_energy_ocpp_authorization
     event_data:
       authorization_status: Invalid
 actions:
@@ -239,4 +239,4 @@ Grizzl-E firmware 5.x has a few OCPP-compliance defects, including responding to
 
 The workaround consists of:
 - checking the *Skip OCPP schema validation* checkbox during OCPP server configuration
-- commenting-out several lines in `/config/custom_components/ocpp/api.py` and adding a few default values to the OCPP server source code. Details are in this [comment in Issue #442](https://github.com/lbbrhzn/ocpp/issues/442#issuecomment-1237651231)
+- commenting-out several lines in `/config/custom_components/sync_energy_ocpp/api.py` and adding a few default values to the OCPP server source code. Details are in this [comment in Issue #442](https://github.com/lbbrhzn/ocpp/issues/442#issuecomment-1237651231)

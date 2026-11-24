@@ -13,8 +13,8 @@ fi
 mkdir -p "${PWD}/config/custom_components"
 
 # Link the ocpp integration (overwrite if exists)
-src="${PWD}/custom_components/ocpp"
-dst="${PWD}/config/custom_components/ocpp"
+src="${PWD}/custom_components/sync_energy_ocpp"
+dst="${PWD}/config/custom_components/sync_energy_ocpp"
 if [[ ! -d "$src" ]]; then
   echo "Missing integration sources at: $src" >&2
   exit 1

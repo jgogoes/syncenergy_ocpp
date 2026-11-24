@@ -33,20 +33,20 @@ from pytest_homeassistant_custom_component.common import (
 )
 from websockets.protocol import State
 
-from custom_components.ocpp import ocppv16
-from custom_components.ocpp.const import (
+from custom_components.sync_energy_ocpp import ocppv16
+from custom_components.sync_energy_ocpp.const import (
     DOMAIN,
     CentralSystemSettings,
     ChargerSystemSettings,
 )
-from custom_components.ocpp.enums import (
+from custom_components.sync_energy_ocpp.enums import (
     ConfigurationKey as ckey,
     HAChargerSession as csess,
     OcppMisc as om,
     Profiles as prof,
 )
-from custom_components.ocpp.ocppv16 import ChargePoint, tx_store_key
-from custom_components.ocpp.switch import SWITCHES, ChargePointSwitch
+from custom_components.sync_energy_ocpp.ocppv16 import ChargePoint, tx_store_key
+from custom_components.sync_energy_ocpp.switch import SWITCHES, ChargePointSwitch
 
 from .test_charge_point_core import _mk_entry_data
 
@@ -1156,7 +1156,7 @@ async def test_a_failing_store_write_does_not_stop_a_start(
         raise RuntimeError("disk gone")
 
     monkeypatch.setattr(cp._tx_store, "async_delay_save", broken)
-    caplog.set_level(logging.DEBUG, logger="custom_components.ocpp")
+    caplog.set_level(logging.DEBUG, logger="custom_components.sync_energy_ocpp")
     tx = cp.on_start_transaction(1, "tag", 0).transaction_id
 
     assert cp._active_tx[1] == tx

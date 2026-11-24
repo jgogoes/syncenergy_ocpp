@@ -19,6 +19,7 @@ import voluptuous as vol
 
 from ocpp.v16.enums import AuthorizationStatus
 
+from .legacy import CONF_IMPORTED_FROM, async_adopt_legacy
 from .api import (
     CentralSystem,
     CHRGR_SERVICE_DATA_SCHEMA,
@@ -298,6 +299,14 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry):
     if hass.data.get(DOMAIN) is None:
         hass.data.setdefault(DOMAIN, {})
         _LOGGER.info(entry.data)
+
+    # Imported from the old "ocpp" domain: take over its devices and entities
+    # before anything registers, so they keep their entity IDs. Done once.
+    legacy_entry_id = entry.data.get(CONF_IMPORTED_FROM)
+    if legacy_entry_id:
+        async_adopt_legacy(hass, entry, legacy_entry_id)
+        data = {k: v for k, v in entry.data.items() if k != CONF_IMPORTED_FROM}
+        hass.config_entries.async_update_entry(entry, data=data)
 
     central_sys = await CentralSystem.create(hass, entry)
 

@@ -90,6 +90,13 @@
                     "Temperature": "Temperature: Temperature reading inside Charge Point",
                     "Voltage": "Voltage: Instantaneous AC RMS supply voltage"
                 }
+            },
+            "import_legacy": {
+                "title": "Import from the old OCPP integration",
+                "description": "Found the disabled OCPP setup \"{title}\" with chargers: {chargers}.\n\nImport copies its settings and moves its devices and entities to this integration. Entity IDs stay the same. After the import works, delete the old OCPP entry and remove the old integration.\n\nTurn off Import to set up a new central system instead.",
+                "data": {
+                    "import": "Import the old settings"
+                }
             }
         },
         "error": {
@@ -101,7 +108,10 @@
         "abort": {
             "single_instance_allowed": "Only a single instance is allowed",
             "reauth_successful": "New charger configured",
-            "reconfigure_successful": "Configuration updated"
+            "reconfigure_successful": "Configuration updated",
+            "legacy_active": "The old OCPP integration is still enabled. Both use the same websocket port, so they cannot run together. Disable the old OCPP entry first (Settings > Devices & services > OCPP > three dots > Disable), then add this integration again.",
+            "legacy_outdated": "The old OCPP setup was made by an older version. Update the old OCPP integration to its latest version and restart Home Assistant, then disable it and add this integration again.",
+            "legacy_unsupported": "The old OCPP setup was saved by a newer version of the OCPP integration than this import supports. Please open an issue at https://github.com/jgogoes/hass_ocpp_bg_sync_ev/issues, or set up this integration by hand."
         }
     },
     "exceptions": {

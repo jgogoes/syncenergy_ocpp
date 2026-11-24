@@ -3,7 +3,7 @@
 import pytest
 import voluptuous as vol
 
-from custom_components.ocpp.api import _connector_id
+from custom_components.sync_energy_ocpp.api import _connector_id
 
 
 @pytest.mark.parametrize(

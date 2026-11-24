@@ -8,7 +8,7 @@ from homeassistant import config_entries, data_entry_flow
 from homeassistant.data_entry_flow import InvalidData
 import pytest
 
-from custom_components.ocpp.const import (
+from custom_components.sync_energy_ocpp.const import (
     CONF_ENABLE_HA_NOTIFICATIONS,
     CONF_NUM_CONNECTORS,
     CONF_SESSION_LIMIT_DEFAULT_PROFILE,
@@ -37,11 +37,11 @@ def bypass_setup_fixture():
     """Prevent setup."""
     with (
         patch(
-            "custom_components.ocpp.async_setup",
+            "custom_components.sync_energy_ocpp.async_setup",
             return_value=True,
         ),
         patch(
-            "custom_components.ocpp.async_setup_entry",
+            "custom_components.sync_energy_ocpp.async_setup_entry",
             return_value=True,
         ),
     ):
@@ -278,7 +278,7 @@ async def test_duplicate_cpid_value_rejected_across_entries(hass, bypass_get_dat
         version=2,
     )
     entry_b_data = {**MOCK_CONFIG_CS, "port": 9102}
-    from custom_components.ocpp.const import CONF_CSID
+    from custom_components.sync_energy_ocpp.const import CONF_CSID
 
     entry_b_data[CONF_CSID] = "test_csid_flow_b"
     entry_b = MockConfigEntry(
@@ -339,7 +339,7 @@ async def test_duplicate_cpid_rejected_when_cp_id_matches_on_another_entry(
     unique across central systems. Excluding a record on cp_id alone would
     also exclude the *other* system's charge point and let its cpid be reused.
     """
-    from custom_components.ocpp.const import CONF_CSID
+    from custom_components.sync_energy_ocpp.const import CONF_CSID
 
     entry_a = MockConfigEntry(
         domain=DOMAIN,
@@ -548,7 +548,7 @@ async def test_failed_config_flow(hass, error_on_get_data):
 
 async def test_reconfigure_flow(hass, bypass_get_data):
     """Test reconfiguring an existing entry (e.g. to pin the OCPP version)."""
-    from custom_components.ocpp.const import CONF_OCPP_VERSION
+    from custom_components.sync_energy_ocpp.const import CONF_OCPP_VERSION
 
     entry = MockConfigEntry(
         domain=DOMAIN,
@@ -587,7 +587,7 @@ async def test_reconfigure_does_not_schedule_second_reload(hass, bypass_get_data
     setup is still in flight and the platform forwards fail with "config entry
     ... has already been setup".
     """
-    from custom_components.ocpp.const import CONF_OCPP_VERSION
+    from custom_components.sync_energy_ocpp.const import CONF_OCPP_VERSION
 
     entry = MockConfigEntry(
         domain=DOMAIN,

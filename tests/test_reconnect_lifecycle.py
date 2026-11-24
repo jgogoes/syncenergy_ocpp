@@ -11,7 +11,7 @@ from websockets.protocol import State
 
 from homeassistant.const import STATE_UNAVAILABLE
 
-from custom_components.ocpp.enums import HAChargerStatuses as cstat
+from custom_components.sync_energy_ocpp.enums import HAChargerStatuses as cstat
 
 from .test_charge_point_core import _mk_cp
 

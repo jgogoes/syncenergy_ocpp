@@ -1,8 +1,8 @@
 {
-  "name": "OCPP - BG Sync EV",
+  "name": "OCPP for Sync Energy chargers (BG SyncEV)",
   "content_in_root": false,
   "homeassistant": "2026.9.0",
   "render_readme": true,
   "zip_release": true,
-  "filename": "ocpp.zip"
+  "filename": "sync_energy_ocpp.zip"
 }

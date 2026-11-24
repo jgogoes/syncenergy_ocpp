@@ -25,8 +25,8 @@ import websockets.asyncio.server
 from homeassistant.helpers import entity_registry as er
 from pytest_homeassistant_custom_component.common import MockConfigEntry
 
-from custom_components.ocpp.const import DOMAIN, sensor_unique_id
-from custom_components.ocpp.enums import HAChargerStatuses as cstat
+from custom_components.sync_energy_ocpp.const import DOMAIN, sensor_unique_id
+from custom_components.sync_energy_ocpp.enums import HAChargerStatuses as cstat
 
 from .const import MOCK_CONFIG_DATA_1
 from .lifecycle_asserts import assert_no_swallowed_lifecycle_errors
@@ -103,7 +103,7 @@ async def test_single_connector_setup_removes_nothing(hass, bypass_websockets, c
     let even a broken guard pass.
     """
     from .const import MOCK_CONFIG_DATA, MOCK_CONFIG_CP_APPEND
-    from custom_components.ocpp.const import CONF_CPIDS
+    from custom_components.sync_energy_ocpp.const import CONF_CPIDS
 
     registry = er.async_get(hass)
     live = registry.async_get_or_create(

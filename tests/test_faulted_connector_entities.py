@@ -18,7 +18,7 @@ from ocpp.v16.enums import (
 )
 from pytest_homeassistant_custom_component.common import MockConfigEntry
 
-from custom_components.ocpp.const import (
+from custom_components.sync_energy_ocpp.const import (
     CONF_CPIDS,
     CONF_NUM_CONNECTORS,
     CONF_PORT,

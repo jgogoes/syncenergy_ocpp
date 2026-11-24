@@ -1,5 +1,6 @@
 """Adds config flow for ocpp."""
 
+from copy import deepcopy
 from typing import Any
 from homeassistant.config_entries import (
     ConfigEntry,
@@ -11,6 +12,7 @@ from homeassistant.core import callback
 from homeassistant.helpers import config_validation as cv
 import voluptuous as vol
 
+from .legacy import CONF_IMPORTED_FROM, LEGACY_VERSION, legacy_entries
 from .const import (
     CONF_CHARGE_POINT_MAX_PROFILE_ABSOLUTE,
     CONF_CPID,
@@ -172,6 +174,8 @@ class ConfigFlow(ConfigFlow, domain=DOMAIN):
         self._entry: ConfigEntry
         self._measurands: str = ""
         self._detected_num_connectors: int = DEFAULT_NUM_CONNECTORS
+        self._legacy_entry: ConfigEntry
+        self._skip_legacy = False
 
     @staticmethod
     @callback
@@ -181,6 +185,10 @@ class ConfigFlow(ConfigFlow, domain=DOMAIN):
 
     async def async_step_user(self, user_input=None) -> ConfigFlowResult:
         """Handle user central system initiated configuration."""
+        if user_input is None and not self._skip_legacy:
+            legacy = self._legacy_to_import()
+            if legacy is not None:
+                return legacy
         errors: dict[str, str] = {}
 
         if user_input is not None:
@@ -195,8 +203,64 @@ class ConfigFlow(ConfigFlow, domain=DOMAIN):
             step_id="user",
             data_schema=STEP_USER_CS_DATA_SCHEMA,
             errors=errors,
-            description_placeholders={"docs_url": "https://github.com/lbbrhzn/ocpp"},
+            description_placeholders={
+                "docs_url": "https://github.com/jgogoes/hass_ocpp_bg_sync_ev"
+            },
         )
+
+    def _legacy_to_import(self) -> ConfigFlowResult | None:
+        """Offer, or refuse, a move from the old "ocpp" domain.
+
+        Returns None when there is nothing to move, so setup goes on as new.
+        """
+        legacy = legacy_entries(self.hass)
+        if not legacy:
+            return None
+        # Both integrations bind the same websocket port, so they must never
+        # run together: the old one has to be disabled first.
+        if any(entry.disabled_by is None for entry in legacy):
+            return self.async_abort(reason="legacy_active")
+        imported = {
+            entry.data.get(CONF_IMPORTED_FROM)
+            for entry in self._async_current_entries(include_ignore=False)
+        }
+        ports = {
+            entry.data.get(CONF_PORT)
+            for entry in self._async_current_entries(include_ignore=False)
+        }
+        for entry in legacy:
+            if entry.entry_id in imported or entry.data.get(CONF_PORT) in ports:
+                continue
+            if (entry.version, entry.minor_version) < LEGACY_VERSION:
+                return self.async_abort(reason="legacy_outdated")
+            if (entry.version, entry.minor_version) > LEGACY_VERSION:
+                return self.async_abort(reason="legacy_unsupported")
+            self._legacy_entry = entry
+            return self.async_show_form(
+                step_id="import_legacy",
+                data_schema=vol.Schema({vol.Required("import", default=True): bool}),
+                description_placeholders={
+                    "title": entry.title,
+                    "chargers": ", ".join(
+                        cp_id
+                        for item in entry.data.get(CONF_CPIDS, [])
+                        for cp_id in item
+                    )
+                    or "-",
+                },
+            )
+        return None
+
+    async def async_step_import_legacy(self, user_input=None) -> ConfigFlowResult:
+        """Copy the disabled old entry's settings into a new entry."""
+        if not user_input or not user_input.get("import"):
+            self._skip_legacy = True
+            return await self.async_step_user()
+        legacy = self._legacy_entry
+        data = deepcopy(dict(legacy.data))
+        data[CONF_IMPORTED_FROM] = legacy.entry_id
+        self._async_abort_entries_match({CONF_PORT: data.get(CONF_PORT)})
+        return self.async_create_entry(title=legacy.title, data=data)
 
     async def async_step_reconfigure(self, user_input=None) -> ConfigFlowResult:
         """Allow reconfiguring the central system settings of an existing entry.
@@ -228,7 +292,9 @@ class ConfigFlow(ConfigFlow, domain=DOMAIN):
             data_schema=self.add_suggested_values_to_schema(
                 STEP_USER_CS_DATA_SCHEMA, entry.data
             ),
-            description_placeholders={"docs_url": "https://github.com/lbbrhzn/ocpp"},
+            description_placeholders={
+                "docs_url": "https://github.com/jgogoes/hass_ocpp_bg_sync_ev"
+            },
         )
 
     async def async_step_integration_discovery(
@@ -323,7 +389,9 @@ class ConfigFlow(ConfigFlow, domain=DOMAIN):
             step_id="cp_user",
             data_schema=STEP_USER_CP_DATA_SCHEMA,
             errors=errors,
-            description_placeholders={"docs_url": "https://github.com/lbbrhzn/ocpp"},
+            description_placeholders={
+                "docs_url": "https://github.com/jgogoes/hass_ocpp_bg_sync_ev"
+            },
         )
 
     async def async_step_measurands(self, user_input=None):

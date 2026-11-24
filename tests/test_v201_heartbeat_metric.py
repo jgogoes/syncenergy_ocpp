@@ -18,16 +18,16 @@ from homeassistant.helpers.dispatcher import async_dispatcher_connect
 from pytest_homeassistant_custom_component.common import MockConfigEntry
 from websockets.protocol import State
 
-from custom_components.ocpp.const import (
+from custom_components.sync_energy_ocpp.const import (
     DATA_UPDATED,
     DOMAIN,
     CentralSystemSettings,
     ChargerSystemSettings,
     sensor_unique_id,
 )
-from custom_components.ocpp.enums import HAChargerStatuses as cstat
-from custom_components.ocpp.ocppv16 import ChargePoint as ChargePoint16
-from custom_components.ocpp.ocppv201 import ChargePoint
+from custom_components.sync_energy_ocpp.enums import HAChargerStatuses as cstat
+from custom_components.sync_energy_ocpp.ocppv16 import ChargePoint as ChargePoint16
+from custom_components.sync_energy_ocpp.ocppv201 import ChargePoint
 
 from .const import CONF_SSL_CERTFILE_PATH, CONF_SSL_KEYFILE_PATH
 
@@ -255,7 +255,7 @@ def _drive_monitor_once(monkeypatch, cp, fail_first_iteration=False):
     wait_for(timeout=0.01) raises a genuine TimeoutError, and it closes
     the connection so the loop exits after one iteration.
     """
-    from custom_components.ocpp import chargepoint as cp_mod
+    from custom_components.sync_energy_ocpp import chargepoint as cp_mod
 
     monkeypatch.setattr(cp_mod, "MONITOR_BACKSTOP_DELAY", 0, raising=True)
     cp.post_connect_success = True
