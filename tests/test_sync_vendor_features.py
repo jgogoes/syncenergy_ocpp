@@ -316,7 +316,7 @@ async def test_device_diagnostics_match_the_entry_report(hass):
 
 # --- End to end: a Sync charger that reconnects without rebooting -----------
 #
-# Found on a real Home Assistant (2.0.0b1 test): a charger that reconnects
+# Found on a real Home Assistant (early test build): a charger that reconnects
 # without rebooting sends no BootNotification on its own, so the vendor is not
 # known when the connection setup checks the Sync keys. The check must run
 # after the BootNotification the setup asks for, or when one arrives later.

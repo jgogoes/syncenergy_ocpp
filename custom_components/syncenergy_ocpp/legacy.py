@@ -1,8 +1,8 @@
 """Move a setup from an older domain to this integration.
 
 Earlier releases of this project, and upstream lbbrhzn/ocpp, use the "ocpp"
-domain. The 2.0.0 betas used "sync_energy_ocpp". The handoff is staged so the two never run at the same time (both
-would bind the same websocket port):
+domain. Early test builds used "sync_energy_ocpp". The handoff is staged so
+the two never run at the same time (both would bind the same websocket port):
 
 1. The user disables the old OCPP config entry. Its settings stay stored, and
    its entities and devices stay in the registries, unloaded.
@@ -28,7 +28,7 @@ _LOGGER = logging.getLogger(__name__)
 
 LEGACY_DOMAIN = "ocpp"
 # Every older domain a setup can be moved from: the "ocpp" releases, and the
-# 2.0.0b1 and 2.0.0b2 betas, which used "sync_energy_ocpp".
+# early test builds, which used "sync_energy_ocpp".
 LEGACY_DOMAINS = (LEGACY_DOMAIN, "sync_energy_ocpp")
 # Set on an imported entry until its first setup has adopted the old entities.
 CONF_IMPORTED_FROM = "imported_from"
