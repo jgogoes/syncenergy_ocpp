@@ -2,7 +2,7 @@
 
 import pytest
 
-from custom_components.sync_energy_ocpp.chargepoint import (
+from custom_components.syncenergy_ocpp.chargepoint import (
     _ConnectorAwareMetrics,
     Metric,
 )

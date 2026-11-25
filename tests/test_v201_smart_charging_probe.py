@@ -24,13 +24,13 @@ from ocpp.exceptions import NotSupportedError
 from pytest_homeassistant_custom_component.common import MockConfigEntry
 from websockets.protocol import State
 
-from custom_components.sync_energy_ocpp.const import (
+from custom_components.syncenergy_ocpp.const import (
     DOMAIN,
     CentralSystemSettings,
     ChargerSystemSettings,
 )
-from custom_components.sync_energy_ocpp.enums import Profiles
-from custom_components.sync_energy_ocpp.ocppv201 import ChargePoint, InventoryReport
+from custom_components.syncenergy_ocpp.enums import Profiles
+from custom_components.syncenergy_ocpp.ocppv201 import ChargePoint, InventoryReport
 
 from .const import CONF_SSL_CERTFILE_PATH, CONF_SSL_KEYFILE_PATH
 

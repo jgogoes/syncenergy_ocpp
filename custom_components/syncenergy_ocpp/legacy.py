@@ -1,7 +1,7 @@
-"""Move a setup from the old "ocpp" domain to this integration.
+"""Move a setup from an older domain to this integration.
 
 Earlier releases of this project, and upstream lbbrhzn/ocpp, use the "ocpp"
-domain. The handoff is staged so the two never run at the same time (both
+domain. The 2.0.0 betas used "sync_energy_ocpp". The handoff is staged so the two never run at the same time (both
 would bind the same websocket port):
 
 1. The user disables the old OCPP config entry. Its settings stay stored, and
@@ -27,6 +27,9 @@ from .const import DOMAIN
 _LOGGER = logging.getLogger(__name__)
 
 LEGACY_DOMAIN = "ocpp"
+# Every older domain a setup can be moved from: the "ocpp" releases, and the
+# 2.0.0b1 and 2.0.0b2 betas, which used "sync_energy_ocpp".
+LEGACY_DOMAINS = (LEGACY_DOMAIN, "sync_energy_ocpp")
 # Set on an imported entry until its first setup has adopted the old entities.
 CONF_IMPORTED_FROM = "imported_from"
 # Only an old entry at this config entry version can be imported as it is.
@@ -36,22 +39,26 @@ LEGACY_VERSION = (2, 3)
 
 @callback
 def legacy_entries(hass: HomeAssistant) -> list[ConfigEntry]:
-    """Return the config entries of the old "ocpp" domain, ignored ones left out."""
-    return hass.config_entries.async_entries(LEGACY_DOMAIN, include_ignore=False)
+    """Return the config entries of the older domains, ignored ones left out."""
+    return [
+        entry
+        for domain in LEGACY_DOMAINS
+        for entry in hass.config_entries.async_entries(domain, include_ignore=False)
+    ]
 
 
-def migrate_unique_id(unique_id: str) -> str:
+def migrate_unique_id(unique_id: str, legacy_domain: str = LEGACY_DOMAIN) -> str:
     """Return the unique_id this integration gives the same entity.
 
-    The domain is part of every unique_id: "<platform>.ocpp.<cpid>..." for
-    buttons, numbers and switches, and "ocpp.<cpid>...sensor" for sensors.
+    The domain is part of every unique_id: "<platform>.<domain>.<cpid>..." for
+    buttons, numbers and switches, and "<domain>.<cpid>...sensor" for sensors.
     Only that domain segment changes.
     """
-    if unique_id.startswith(f"{LEGACY_DOMAIN}."):
-        return f"{DOMAIN}.{unique_id[len(LEGACY_DOMAIN) + 1 :]}"
+    if unique_id.startswith(f"{legacy_domain}."):
+        return f"{DOMAIN}.{unique_id[len(legacy_domain) + 1 :]}"
     platform, sep, rest = unique_id.partition(".")
-    if sep and rest.startswith(f"{LEGACY_DOMAIN}."):
-        return f"{platform}.{DOMAIN}.{rest[len(LEGACY_DOMAIN) + 1 :]}"
+    if sep and rest.startswith(f"{legacy_domain}."):
+        return f"{platform}.{DOMAIN}.{rest[len(legacy_domain) + 1 :]}"
     return unique_id
 
 
@@ -64,14 +71,17 @@ def async_adopt_legacy(
     Returns how many devices and entities were moved. The old entry must not
     be loaded; the config flow only imports a disabled one.
     """
+    legacy_entry = hass.config_entries.async_get_entry(legacy_entry_id)
+    legacy_domain = legacy_entry.domain if legacy_entry else LEGACY_DOMAIN
+
     # Entities first: moving a device off the old entry makes the registry
     # remove the old entry's entities that are still on that device.
     ent_reg = er.async_get(hass)
     entities = 0
     for entity in er.async_entries_for_config_entry(ent_reg, legacy_entry_id):
-        if entity.platform != LEGACY_DOMAIN:
+        if entity.platform != legacy_domain:
             continue
-        new_unique_id = migrate_unique_id(entity.unique_id)
+        new_unique_id = migrate_unique_id(entity.unique_id, legacy_domain)
         if ent_reg.async_get_entity_id(entity.domain, DOMAIN, new_unique_id):
             _LOGGER.warning(
                 "Not moving %s: this integration already has an entity for it",
@@ -95,7 +105,7 @@ def async_adopt_legacy(
     devices = 0
     for device in dr.async_entries_for_config_entry(dev_reg, legacy_entry_id):
         identifiers = {
-            (DOMAIN, value) if domain == LEGACY_DOMAIN else (domain, value)
+            (DOMAIN, value) if domain == legacy_domain else (domain, value)
             for domain, value in device.identifiers
         }
         dev_reg.async_update_device(

@@ -1,6 +1,6 @@
-# Moving to `sync_energy_ocpp` (version 2.0.0)
+# Moving to `syncenergy_ocpp` (version 2.0.0)
 
-From version 2.0.0 this integration uses the domain `sync_energy_ocpp`
+From version 2.0.0 this integration uses the domain `syncenergy_ocpp`
 instead of `ocpp`. This page moves your setup across. It works the same way
 for this project before 2.0.0 and for upstream
 [lbbrhzn/ocpp](https://github.com/lbbrhzn/ocpp).
@@ -27,9 +27,9 @@ The guided import was tested in the Home Assistant test environment
 ## What you must change yourself
 
 - **Actions (services)** move to the new domain. For example,
-  `ocpp.set_charge_rate` becomes `sync_energy_ocpp.set_charge_rate`.
+  `ocpp.set_charge_rate` becomes `syncenergy_ocpp.set_charge_rate`.
   Update your automations and scripts.
-- **The authorization event** is now `sync_energy_ocpp_authorization`
+- **The authorization event** is now `syncenergy_ocpp_authorization`
   (was `ocpp_authorization`).
 - **evcc or other tools** that call Home Assistant actions by name need the
   same change. Entity IDs do not change.
@@ -37,7 +37,7 @@ The guided import was tested in the Home Assistant test environment
 ## Steps
 
 Version 2.0.0 lives in a new repository,
-[jgogoes/sync_energy_ocpp](https://github.com/jgogoes/sync_energy_ocpp).
+[jgogoes/syncenergy_ocpp](https://github.com/jgogoes/syncenergy_ocpp).
 You install it next to the old integration and keep the old one until the
 new one works. The old integration is only removed at the end.
 
@@ -48,7 +48,7 @@ the same time. Do the steps in this order.
 2. **Update the old integration** to its latest version (1.2.0), and
    restart. The import accepts only a setup saved by a current version.
 3. **Install the new integration.** In the Marketplace (or HACS), add the
-   repository `https://github.com/jgogoes/sync_energy_ocpp` as a custom
+   repository `https://github.com/jgogoes/syncenergy_ocpp` as a custom
    repository of type **Integration** (not needed once it is listed in the
    Marketplace), then download **OCPP for Sync Energy chargers**. Do not add
    it in Devices & services yet.
@@ -79,6 +79,6 @@ nothing left to import.
   Do not just delete the new entry: the import moved the devices and
   entities to it, so deleting it deletes them.
 - Please report problems in the
-  [issue tracker](https://github.com/jgogoes/sync_energy_ocpp/issues),
+  [issue tracker](https://github.com/jgogoes/syncenergy_ocpp/issues),
   with the diagnostics file (device page → three dots → **Download
   diagnostics**).

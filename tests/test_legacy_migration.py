@@ -1,4 +1,4 @@
-"""Moving a setup from the old "ocpp" domain to sync_energy_ocpp.
+"""Moving a setup from the old "ocpp" domain to syncenergy_ocpp.
 
 The handoff must never run both integrations (they bind the same port), must
 copy the settings before the old entry is removed, and must keep entity IDs so
@@ -19,15 +19,16 @@ from pytest_homeassistant_custom_component.components.recorder.common import (
     async_wait_recording_done,
 )
 
-from custom_components.sync_energy_ocpp.const import (
+from custom_components.syncenergy_ocpp.const import (
     CONF_CPIDS,
     CONF_PORT,
     DOMAIN,
     sensor_unique_id,
 )
-from custom_components.sync_energy_ocpp.legacy import (
+from custom_components.syncenergy_ocpp.legacy import (
     CONF_IMPORTED_FROM,
     LEGACY_DOMAIN,
+    LEGACY_DOMAINS,
     migrate_unique_id,
 )
 
@@ -50,24 +51,24 @@ ENERGY_ENTITY_ID = "sensor.my_garage_charger_energy"
 ENERGY_METRIC = "Energy.Active.Import.Register"
 
 
-def _legacy_unique_id(new_unique_id: str) -> str:
-    """Return the unique_id the old "ocpp" domain gave the same entity."""
-    return new_unique_id.replace(DOMAIN, LEGACY_DOMAIN, 1)
+def _legacy_unique_id(new_unique_id: str, legacy_domain: str = LEGACY_DOMAIN) -> str:
+    """Return the unique_id an older domain gave the same entity."""
+    return new_unique_id.replace(DOMAIN, legacy_domain, 1)
 
 
 @pytest.mark.parametrize(
     ("old", "new"),
     [
-        ("ocpp.test_cpid.vendor.sensor", "sync_energy_ocpp.test_cpid.vendor.sensor"),
+        ("ocpp.test_cpid.vendor.sensor", "syncenergy_ocpp.test_cpid.vendor.sensor"),
         (
             "switch.ocpp.test_cpid.charge_control",
-            "switch.sync_energy_ocpp.test_cpid.charge_control",
+            "switch.syncenergy_ocpp.test_cpid.charge_control",
         ),
         (
             "number.ocpp.test_cpid.conn1.maximum_current",
-            "number.sync_energy_ocpp.test_cpid.conn1.maximum_current",
+            "number.syncenergy_ocpp.test_cpid.conn1.maximum_current",
         ),
-        ("button.ocpp.test_cpid.reset", "button.sync_energy_ocpp.test_cpid.reset"),
+        ("button.ocpp.test_cpid.reset", "button.syncenergy_ocpp.test_cpid.reset"),
         ("something.else", "something.else"),
         ("sensor.ocppx.test", "sensor.ocppx.test"),
     ],
@@ -77,14 +78,16 @@ def test_migrate_unique_id_changes_only_the_domain_segment(old, new):
     assert migrate_unique_id(old) == new
 
 
-def _legacy_entry(hass, *, disabled=True, version=(2, 3), port=PORT):
+def _legacy_entry(
+    hass, *, disabled=True, version=(2, 3), port=PORT, domain=LEGACY_DOMAIN
+):
     data = {
         **MOCK_CONFIG_DATA,
         CONF_PORT: port,
         CONF_CPIDS: [{CP_ID: dict(MOCK_CONFIG_CP_APPEND)}],
     }
     entry = MockConfigEntry(
-        domain=LEGACY_DOMAIN,
+        domain=domain,
         data=data,
         title="old_central",
         version=version[0],
@@ -97,17 +100,18 @@ def _legacy_entry(hass, *, disabled=True, version=(2, 3), port=PORT):
 
 def _register_legacy_objects(hass, legacy):
     """Put the old setup's devices and entities in the registries."""
+    old = legacy.domain
     dev_reg = dr.async_get(hass)
     charger = dev_reg.async_get_or_create(
         config_entry_id=legacy.entry_id,
-        identifiers={(LEGACY_DOMAIN, CP_ID), (LEGACY_DOMAIN, CPID)},
+        identifiers={(old, CP_ID), (old, CPID)},
         name=CPID,
     )
     ent_reg = er.async_get(hass)
-    sensor_uid = _legacy_unique_id(sensor_unique_id(CPID, "Vendor"))
+    sensor_uid = _legacy_unique_id(sensor_unique_id(CPID, "Vendor"), old)
     ent_reg.async_get_or_create(
         "sensor",
-        LEGACY_DOMAIN,
+        old,
         sensor_uid,
         config_entry=legacy,
         device_id=charger.id,
@@ -115,16 +119,16 @@ def _register_legacy_objects(hass, legacy):
     )
     ent_reg.async_get_or_create(
         "switch",
-        LEGACY_DOMAIN,
-        f"switch.{LEGACY_DOMAIN}.{CPID}.charge_control",
+        old,
+        f"switch.{old}.{CPID}.charge_control",
         config_entry=legacy,
         device_id=charger.id,
         suggested_object_id="my_garage_charger_charge_control",
     )
     ent_reg.async_get_or_create(
         "sensor",
-        LEGACY_DOMAIN,
-        _legacy_unique_id(sensor_unique_id(CPID, ENERGY_METRIC)),
+        old,
+        _legacy_unique_id(sensor_unique_id(CPID, ENERGY_METRIC), old),
         config_entry=legacy,
         device_id=charger.id,
         suggested_object_id="my_garage_charger_energy",
@@ -179,11 +183,12 @@ async def _start_flow(hass):
     )
 
 
+@pytest.mark.parametrize("old_domain", LEGACY_DOMAINS)
 async def test_import_keeps_entity_ids_history_and_survives_old_entry_delete(
-    recorder_mock, hass, socket_enabled
+    recorder_mock, hass, socket_enabled, old_domain
 ):
-    """The full staged handoff, end to end."""
-    legacy = _legacy_entry(hass)
+    """The full staged handoff, end to end, from each older domain."""
+    legacy = _legacy_entry(hass, domain=old_domain)
     charger = _register_legacy_objects(hass, legacy)
 
     # History recorded under the old integration.

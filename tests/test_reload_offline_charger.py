@@ -32,7 +32,7 @@ import pytest
 import websockets.asyncio.server
 from pytest_homeassistant_custom_component.common import MockConfigEntry
 
-from custom_components.sync_energy_ocpp.const import CONF_CPIDS, DOMAIN
+from custom_components.syncenergy_ocpp.const import CONF_CPIDS, DOMAIN
 
 from .const import MOCK_CONFIG_DATA, MOCK_CONFIG_DATA_1, MOCK_CONFIG_CP_APPEND
 from .lifecycle_asserts import (

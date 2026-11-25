@@ -10,8 +10,8 @@ from unittest.mock import AsyncMock, MagicMock
 import pytest
 from pytest_homeassistant_custom_component.common import MockConfigEntry
 
-from custom_components.sync_energy_ocpp.chargepoint import _model_family
-from custom_components.sync_energy_ocpp.const import (
+from custom_components.syncenergy_ocpp.chargepoint import _model_family
+from custom_components.syncenergy_ocpp.const import (
     CONF_CPID,
     CONF_CPIDS,
     CONF_PASSWORD,
@@ -19,11 +19,11 @@ from custom_components.sync_energy_ocpp.const import (
     DOMAIN,
     SYNCEV_VENDOR_KEYS,
 )
-from custom_components.sync_energy_ocpp.diagnostics import (
+from custom_components.syncenergy_ocpp.diagnostics import (
     async_get_config_entry_diagnostics,
 )
-from custom_components.sync_energy_ocpp.enums import HAChargerDetails as cdet, Profiles
-from custom_components.sync_energy_ocpp.ocppv16 import ChargePoint as ChargePointV16
+from custom_components.syncenergy_ocpp.enums import HAChargerDetails as cdet, Profiles
+from custom_components.syncenergy_ocpp.ocppv16 import ChargePoint as ChargePointV16
 
 from .const import MOCK_CONFIG_CP, MOCK_CONFIG_CS
 
@@ -245,7 +245,7 @@ def _description(items, key):
 )
 def test_vendor_switch_availability(key, found, vendor, expected):
     """Sync-specific switches follow the probe, not the model list."""
-    from custom_components.sync_energy_ocpp.switch import SWITCHES, ChargePointSwitch
+    from custom_components.syncenergy_ocpp.switch import SWITCHES, ChargePointSwitch
 
     cp = _charge_point(vendor, "Pulsar")
     cp.vendor_keys = set(found)
@@ -255,7 +255,7 @@ def test_vendor_switch_availability(key, found, vendor, expected):
 
 def test_vendor_switch_unavailable_without_a_charger():
     """No connected charger means no vendor switch."""
-    from custom_components.sync_energy_ocpp.switch import SWITCHES, ChargePointSwitch
+    from custom_components.syncenergy_ocpp.switch import SWITCHES, ChargePointSwitch
 
     entity = _entity(ChargePointSwitch, _description(SWITCHES, "ChargerMode"), None)
     assert entity.available is False
@@ -263,7 +263,7 @@ def test_vendor_switch_unavailable_without_a_charger():
 
 def test_standard_ocpp_switch_is_not_gated():
     """A standard OCPP key stays available on any connected charger."""
-    from custom_components.sync_energy_ocpp.switch import SWITCHES, ChargePointSwitch
+    from custom_components.syncenergy_ocpp.switch import SWITCHES, ChargePointSwitch
 
     desc = _description(SWITCHES, "UnlockConnectorOnEVSideDisconnect")
     entity = _entity(ChargePointSwitch, desc, _charge_point("Wallbox"))
@@ -275,7 +275,7 @@ def test_standard_ocpp_switch_is_not_gated():
 )
 def test_led_brightness_number_follows_the_probe(found, expected):
     """The LED number shows on any Sync model that has the key."""
-    from custom_components.sync_energy_ocpp.number import NUMBERS, ChargePointNumber
+    from custom_components.syncenergy_ocpp.number import NUMBERS, ChargePointNumber
 
     cp = _charge_point("Sync Energy", "EVWC2T7G-03")
     cp.vendor_keys = set(found)
@@ -285,7 +285,7 @@ def test_led_brightness_number_follows_the_probe(found, expected):
 
 async def test_switch_refresh_skips_a_key_the_charger_lacks():
     """Reading an unknown key raises an HA notification, so it is not read."""
-    from custom_components.sync_energy_ocpp.switch import SWITCHES, ChargePointSwitch
+    from custom_components.syncenergy_ocpp.switch import SWITCHES, ChargePointSwitch
 
     cp = _charge_point("Wallbox")
     cp.get_configuration = AsyncMock()
@@ -298,7 +298,7 @@ async def test_switch_refresh_skips_a_key_the_charger_lacks():
 
 async def test_device_diagnostics_match_the_entry_report(hass):
     """Download diagnostics works from the charger's device page too."""
-    from custom_components.sync_energy_ocpp.diagnostics import (
+    from custom_components.syncenergy_ocpp.diagnostics import (
         async_get_device_diagnostics,
     )
 

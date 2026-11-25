@@ -1,6 +1,6 @@
 """Constants for ocpp tests."""
 
-from custom_components.sync_energy_ocpp.const import (
+from custom_components.syncenergy_ocpp.const import (
     CONF_CHARGE_POINT_MAX_PROFILE_ABSOLUTE,
     CONF_CPID,
     CONF_CPIDS,

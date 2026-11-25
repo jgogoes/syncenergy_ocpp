@@ -10,7 +10,7 @@ This page covers what changes once a second one exists.
 Every OCPP action takes an optional `devid`:
 
 ```yaml
-- action: sync_energy_ocpp.set_charge_rate
+- action: syncenergy_ocpp.set_charge_rate
   data:
     devid: garage_charger
     limit_amps: 16

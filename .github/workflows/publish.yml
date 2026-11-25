@@ -43,18 +43,18 @@ jobs:
         uses: actions/upload-artifact@v7.0.2
         if: ${{ github.event_name == 'push' }}
         with:
-          name: sync_energy_ocpp
-          path: ${{ github.workspace }}/custom_components/sync_energy_ocpp
+          name: syncenergy_ocpp
+          path: ${{ github.workspace }}/custom_components/syncenergy_ocpp
 
       # Pack the dir as a zip and upload to the release
       - name: 📦 ZIP Dir
         if: ${{ github.event_name == 'release' }}
         run: |
-          cd ${{ github.workspace }}/custom_components/sync_energy_ocpp
-          zip sync_energy_ocpp.zip -r ./
+          cd ${{ github.workspace }}/custom_components/syncenergy_ocpp
+          zip syncenergy_ocpp.zip -r ./
 
       - name: 📤 Upload zip to release
         uses: softprops/action-gh-release@v3
         if: ${{ github.event_name == 'release' }}
         with:
-          files: ${{ github.workspace }}/custom_components/sync_energy_ocpp/sync_energy_ocpp.zip
+          files: ${{ github.workspace }}/custom_components/syncenergy_ocpp/syncenergy_ocpp.zip

@@ -474,4 +474,4 @@ turns out to be unnecessary.
   Run `ocpp.clear_profile` to reset.
 - evcc remains **disabled**. Do not re-enable until the 1 dp rounding is in —
   every fractional set it makes will throw an HTTP 500.
-- Debug logging remains enabled for `custom_components.sync_energy_ocpp` and `ocpp`.
+- Debug logging remains enabled for `custom_components.syncenergy_ocpp` and `ocpp`.

@@ -74,7 +74,7 @@ source venv/bin/activate
 # Install requirements
 pip install -r requirements.txt
 # Run tests and get a summary of successes/failures and code coverage
-pytest --durations=10 --cov-report term-missing --cov=custom_components.sync_energy_ocpp tests
+pytest --durations=10 --cov-report term-missing --cov=custom_components.syncenergy_ocpp tests
 ```
 
 If any of the tests fail, make the necessary changes to the tests as part of

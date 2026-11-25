@@ -26,12 +26,12 @@ from ocpp.v201.enums import (
 from pytest_homeassistant_custom_component.common import MockConfigEntry
 from websockets.protocol import State
 
-from custom_components.sync_energy_ocpp.const import (
+from custom_components.syncenergy_ocpp.const import (
     DOMAIN,
     CentralSystemSettings,
     ChargerSystemSettings,
 )
-from custom_components.sync_energy_ocpp.ocppv201 import ChargePoint, InventoryReport
+from custom_components.syncenergy_ocpp.ocppv201 import ChargePoint, InventoryReport
 
 from .const import CONF_SSL_CERTFILE_PATH, CONF_SSL_KEYFILE_PATH
 
@@ -589,7 +589,7 @@ async def test_set_session_limit_v201_binds_the_displayed_transaction(hass):
     """Only an Accepted reply confirms; everything else raises a clear error."""
     from ocpp.v201.enums import ChargingProfileStatusEnumType
 
-    from custom_components.sync_energy_ocpp.enums import HAChargerSession as csess
+    from custom_components.syncenergy_ocpp.enums import HAChargerSession as csess
 
     cp = _mk_cp(hass)
     cp._inventory = InventoryReport(
@@ -662,7 +662,7 @@ async def test_session_amp_request_is_converted_for_a_watt_only_station(hass):
 @pytest.mark.asyncio
 async def test_set_session_limit_v201_aborts_when_the_transaction_changes(hass):
     """A transaction that changes during the inventory wait gets no stale profile."""
-    from custom_components.sync_energy_ocpp.enums import HAChargerSession as csess
+    from custom_components.syncenergy_ocpp.enums import HAChargerSession as csess
 
     cp = _mk_cp(hass)
     cp._inventory = InventoryReport(evse_count=1, connector_count=[1])
@@ -727,7 +727,7 @@ async def test_session_default_limit_targets_the_connectors_evse(hass):
 @pytest.mark.asyncio
 async def test_a_refused_session_limit_names_the_level_without_the_16_option(hass):
     """2.0.1 defines ProfileStackLevel as the maximum value: no 1.6 advice."""
-    from custom_components.sync_energy_ocpp.enums import HAChargerSession as csess
+    from custom_components.syncenergy_ocpp.enums import HAChargerSession as csess
 
     cp = _mk_cp(hass, status=ChargingProfileStatusEnumType.rejected)
     cp._inventory = InventoryReport(

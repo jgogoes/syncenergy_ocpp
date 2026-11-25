@@ -10,8 +10,8 @@ from decimal import Decimal
 
 import pytest
 
-from custom_components.sync_energy_ocpp.const import CHARGE_RATE_STEP
-from custom_components.sync_energy_ocpp.number import _quantise_rate
+from custom_components.syncenergy_ocpp.const import CHARGE_RATE_STEP
+from custom_components.syncenergy_ocpp.number import _quantise_rate
 
 
 class TestQuantiseRate:

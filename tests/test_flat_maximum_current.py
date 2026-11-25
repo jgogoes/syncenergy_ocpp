@@ -19,7 +19,7 @@ from pytest_homeassistant_custom_component.common import (
     mock_restore_cache_with_extra_data,
 )
 
-from custom_components.sync_energy_ocpp.const import (
+from custom_components.syncenergy_ocpp.const import (
     CONF_CPIDS,
     CONF_MAX_CURRENT,
     CONF_NUM_CONNECTORS,
@@ -27,14 +27,14 @@ from custom_components.sync_energy_ocpp.const import (
     DOMAIN,
     ChargerSystemSettings,
 )
-from custom_components.sync_energy_ocpp.enums import (
+from custom_components.syncenergy_ocpp.enums import (
     ConfigurationKey,
     HAChargerSession as csess,
     HAChargerStatuses as cstat,
     Profiles,
 )
-from custom_components.sync_energy_ocpp.ocppv16 import ChargePoint as ChargePoint16
-from custom_components.sync_energy_ocpp.ocppv201 import (
+from custom_components.syncenergy_ocpp.ocppv16 import ChargePoint as ChargePoint16
+from custom_components.syncenergy_ocpp.ocppv201 import (
     ChargePoint as ChargePoint201,
     InventoryReport,
 )
@@ -147,13 +147,13 @@ async def test_one_master_on_station_device(hass, flat_entry, setup_flat, connec
     master = next(
         entry
         for entry in numbers
-        if entry.unique_id == "number.sync_energy_ocpp.test_cpid.maximum_current"
+        if entry.unique_id == "number.syncenergy_ocpp.test_cpid.maximum_current"
     )
     expected_sessions = (
-        {"number.sync_energy_ocpp.test_cpid.session_current_limit"}
+        {"number.syncenergy_ocpp.test_cpid.session_current_limit"}
         if connectors == 1
         else {
-            f"number.sync_energy_ocpp.test_cpid.conn{connector}.session_current_limit"
+            f"number.syncenergy_ocpp.test_cpid.conn{connector}.session_current_limit"
             for connector in range(1, connectors + 1)
         }
     )
@@ -185,13 +185,13 @@ async def test_cleanup_only_legacy_numbers_for_this_charger(
 ):
     """Clean all stale indices, names and disabled entries without overmatching."""
     _configure(hass, flat_entry, cpid="test.cpid", num_connectors=connectors)
-    caplog.set_level(logging.INFO, logger="custom_components.sync_energy_ocpp")
+    caplog.set_level(logging.INFO, logger="custom_components.syncenergy_ocpp")
     registry = er.async_get(hass)
     removed = [
         _register(
             hass,
             flat_entry,
-            f"number.sync_energy_ocpp.test.cpid.conn{n}.maximum_current",
+            f"number.syncenergy_ocpp.test.cpid.conn{n}.maximum_current",
             suggested_object_id=f"custom_slider_{n}",
             disabled_by=er.RegistryEntryDisabler.USER if n == 2 else None,
         )
@@ -201,36 +201,36 @@ async def test_cleanup_only_legacy_numbers_for_this_charger(
     foreign_entry.add_to_hass(hass)
     kept = [
         _register(
-            hass, flat_entry, "number.sync_energy_ocpp.testXcpid.conn1.maximum_current"
+            hass, flat_entry, "number.syncenergy_ocpp.testXcpid.conn1.maximum_current"
         ),
         _register(
             hass,
             flat_entry,
-            "number.sync_energy_ocpp.test.cpid_other.conn1.maximum_current",
+            "number.syncenergy_ocpp.test.cpid_other.conn1.maximum_current",
         ),
         _register(
-            hass, flat_entry, "number.sync_energy_ocpp.test.cpid.conn1.another_number"
+            hass, flat_entry, "number.syncenergy_ocpp.test.cpid.conn1.another_number"
         ),
         _register(
             hass,
             flat_entry,
-            "number.sync_energy_ocpp.test.cpid.conn1.maximum_current.extra",
+            "number.syncenergy_ocpp.test.cpid.conn1.maximum_current.extra",
         ),
         _register(
             hass,
             foreign_entry,
-            "number.sync_energy_ocpp.test.cpid.conn5.maximum_current",
+            "number.syncenergy_ocpp.test.cpid.conn5.maximum_current",
         ),
         registry.async_get_or_create(
             "number",
             "other",
-            "number.sync_energy_ocpp.test.cpid.conn6.maximum_current",
+            "number.syncenergy_ocpp.test.cpid.conn6.maximum_current",
             config_entry=flat_entry,
         ),
         registry.async_get_or_create(
             "sensor",
             DOMAIN,
-            "number.sync_energy_ocpp.test.cpid.conn7.maximum_current",
+            "number.syncenergy_ocpp.test.cpid.conn7.maximum_current",
             config_entry=flat_entry,
         ),
     ]
@@ -256,7 +256,7 @@ async def test_existing_master_survives_connector_reconfiguration(
     existing = _register(
         hass,
         flat_entry,
-        "number.sync_energy_ocpp.test_cpid.maximum_current",
+        "number.syncenergy_ocpp.test_cpid.maximum_current",
         suggested_object_id="custom_station_limit",
     )
     existing = er.async_get(hass).async_update_entity(
@@ -287,7 +287,7 @@ async def test_new_master_ignores_old_restore_data(
         old = _register(
             hass,
             flat_entry,
-            "number.sync_energy_ocpp.test_cpid.conn1.maximum_current",
+            "number.syncenergy_ocpp.test_cpid.conn1.maximum_current",
             suggested_object_id="test_cpid_maximum_current",
         )
         assert old.entity_id == eid
@@ -509,17 +509,17 @@ async def test_slider201_uses_existing_station_path(
         (
             1,
             (
-                "number.sync_energy_ocpp.test_cpid.conn1.session_current_limit",
-                "number.sync_energy_ocpp.test_cpid.conn2.session_current_limit",
+                "number.syncenergy_ocpp.test_cpid.conn1.session_current_limit",
+                "number.syncenergy_ocpp.test_cpid.conn2.session_current_limit",
             ),
-            {"number.sync_energy_ocpp.test_cpid.session_current_limit"},
+            {"number.syncenergy_ocpp.test_cpid.session_current_limit"},
         ),
         (
             2,
-            ("number.sync_energy_ocpp.test_cpid.session_current_limit",),
+            ("number.syncenergy_ocpp.test_cpid.session_current_limit",),
             {
-                "number.sync_energy_ocpp.test_cpid.conn1.session_current_limit",
-                "number.sync_energy_ocpp.test_cpid.conn2.session_current_limit",
+                "number.syncenergy_ocpp.test_cpid.conn1.session_current_limit",
+                "number.syncenergy_ocpp.test_cpid.conn2.session_current_limit",
             },
         ),
     ],
@@ -537,7 +537,7 @@ async def test_session_entities_follow_connector_topology_without_orphans(
     registry = er.async_get(hass)
     stale = [_register(hass, flat_entry, uid) for uid in stale_uids]
     foreign = _register(
-        hass, flat_entry, "number.sync_energy_ocpp.other.conn1.session_current_limit"
+        hass, flat_entry, "number.syncenergy_ocpp.other.conn1.session_current_limit"
     )
 
     await setup_flat()
@@ -567,7 +567,7 @@ async def test_session_entities_follow_a_malformed_or_oversized_connector_count(
         for entry in er.async_entries_for_config_entry(registry, flat_entry.entry_id)
         if "session_current_limit" in entry.unique_id
     }
-    assert session_uids == {"number.sync_energy_ocpp.test_cpid.session_current_limit"}
+    assert session_uids == {"number.syncenergy_ocpp.test_cpid.session_current_limit"}
 
     await hass.config_entries.async_unload(flat_entry.entry_id)
     _configure(hass, flat_entry, num_connectors=12)
@@ -720,7 +720,7 @@ async def test_session_entity_error_paths_and_ordering(
     """Generic failures, a False reply, a no-op revert, and strict ordering."""
     from homeassistant.helpers.dispatcher import async_dispatcher_send
 
-    from custom_components.sync_energy_ocpp.const import DATA_UPDATED
+    from custom_components.syncenergy_ocpp.const import DATA_UPDATED
 
     _configure(hass, flat_entry, num_connectors=1)
     central = await setup_flat()
@@ -856,7 +856,7 @@ async def test_default_profile_session_entity_needs_no_transaction(
     """With the option on, the slider writes a connector TxDefaultProfile."""
     from ocpp.v16.enums import ChargingProfileStatus
 
-    from custom_components.sync_energy_ocpp.number import SessionDefaultLimitNumber
+    from custom_components.syncenergy_ocpp.number import SessionDefaultLimitNumber
 
     _configure(hass, flat_entry, num_connectors=1, session_limit_default_profile=True)
     central = await setup_flat()

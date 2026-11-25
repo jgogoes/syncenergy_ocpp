@@ -47,7 +47,7 @@ CONF_WEBSOCKET_CLOSE_TIMEOUT = "websocket_close_timeout"
 CONF_WEBSOCKET_PING_TRIES = "websocket_ping_tries"
 CONF_WEBSOCKET_PING_INTERVAL = "websocket_ping_interval"
 CONF_WEBSOCKET_PING_TIMEOUT = "websocket_ping_timeout"
-DATA_UPDATED = "sync_energy_ocpp_data_updated"
+DATA_UPDATED = "syncenergy_ocpp_data_updated"
 DEFAULT_CHARGE_POINT_MAX_PROFILE_ABSOLUTE = False
 DEFAULT_CSID = "central"
 DEFAULT_CPID = "charger"
@@ -147,7 +147,7 @@ DEFAULT_WEBSOCKET_CLOSE_TIMEOUT = 10
 DEFAULT_WEBSOCKET_PING_TRIES = 2
 DEFAULT_WEBSOCKET_PING_INTERVAL = 20
 DEFAULT_WEBSOCKET_PING_TIMEOUT = 20
-DOMAIN = "sync_energy_ocpp"
+DOMAIN = "syncenergy_ocpp"
 CONFIG = "config"
 EVENT_AUTHORIZATION = f"{DOMAIN}_authorization"
 

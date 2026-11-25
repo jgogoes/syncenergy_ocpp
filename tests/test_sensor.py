@@ -11,7 +11,7 @@ from homeassistant.components.sensor.const import (
     SensorStateClass,
 )
 
-from custom_components.sync_energy_ocpp.const import (
+from custom_components.syncenergy_ocpp.const import (
     CONF_NUM_CONNECTORS,
     DOMAIN as OCPP_DOMAIN,
 )

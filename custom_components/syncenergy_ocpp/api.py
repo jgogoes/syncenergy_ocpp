@@ -226,7 +226,7 @@ class CentralSystem:
         self.platforms_forwarded = False
 
         # Service registration is performed globally by the integration setup
-        # (custom_components/sync_energy_ocpp/__init__.py) so that multiple central system
+        # (custom_components/syncenergy_ocpp/__init__.py) so that multiple central system
         # instances do not overwrite each other's handlers.  See
         # _register_domain_services() in __init__.py.
 

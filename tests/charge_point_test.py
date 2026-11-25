@@ -5,10 +5,10 @@ import asyncio
 from homeassistant.core import HomeAssistant
 from websockets import Subprotocol
 
-from custom_components.sync_energy_ocpp import CentralSystem
+from custom_components.syncenergy_ocpp import CentralSystem
 from .const import CONF_PORT
 import contextlib
-from custom_components.sync_energy_ocpp.const import DOMAIN as OCPP_DOMAIN
+from custom_components.syncenergy_ocpp.const import DOMAIN as OCPP_DOMAIN
 from homeassistant.components.button import DOMAIN as BUTTON_DOMAIN
 from homeassistant.components.button.const import SERVICE_PRESS
 from homeassistant.components.number import DOMAIN as NUMBER_DOMAIN

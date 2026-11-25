@@ -1,4 +1,4 @@
-![OCPP for Sync Energy chargers](custom_components/sync_energy_ocpp/brand/icon.png)
+![OCPP for Sync Energy chargers](custom_components/syncenergy_ocpp/brand/icon.png)
 
 # OCPP for Sync Energy chargers (BG SyncEV)
 
@@ -16,7 +16,7 @@ extra controls for Sync Energy hardware. Everything upstream does, this does too
 > **New name, new domain (version 2.0.0).** This project was called
 > "OCPP - BG Sync EV" and used the `ocpp` domain, the same as upstream. Two
 > integrations with the same domain cannot both be in the Home Assistant
-> Marketplace, so from 2.0.0 the domain is `sync_energy_ocpp`. This lets the
+> Marketplace, so from 2.0.0 the domain is `syncenergy_ocpp`. This lets the
 > integration be listed in the Marketplace, and lets you install it next to
 > upstream. It also moved to this new repository; the old one was
 > [jgogoes/hass_ocpp_bg_sync_ev](https://github.com/jgogoes/hass_ocpp_bg_sync_ev).
@@ -81,11 +81,11 @@ that used to trip a `C1249 Too Many Wake-Up Requests` fault on a VW ID.3.
 Until the Marketplace listing is approved, add it as a custom repository:
 
 1. HACS → three-dot menu → **Custom repositories**
-2. Add `https://github.com/jgogoes/sync_energy_ocpp`, type **Integration**
+2. Add `https://github.com/jgogoes/syncenergy_ocpp`, type **Integration**
 3. Search for **Sync Energy**, download it, then restart Home Assistant
 4. **Settings → Devices & services → Add integration → OCPP for Sync Energy chargers**
 
-Or copy `custom_components/sync_energy_ocpp/` into your
+Or copy `custom_components/syncenergy_ocpp/` into your
 `config/custom_components/` folder and restart.
 
 Moving from the old `ocpp` domain (this project before 2.0.0, or upstream)?
@@ -114,7 +114,7 @@ sent. The charging-profile fixes are general.
 | EVT77G, EVT77GG, EVWC2T7GG, EVL7PS(G), EVL7MS(G), EVLR7MS(G), EVLS7MS(G) | Expected to work, untested |
 
 **Sync charger not detected, or not in the table?** Please help by sending a
-[compatibility report](https://github.com/jgogoes/sync_energy_ocpp/issues/new?template=compatibility.yml).
+[compatibility report](https://github.com/jgogoes/syncenergy_ocpp/issues/new?template=compatibility.yml).
 It takes two minutes: on the charger's device page (or the OCPP integration entry), select
 **⋮ → Download diagnostics** and attach the file. The diagnostics file
 contains no charge point id, serial number or password.

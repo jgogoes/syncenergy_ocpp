@@ -24,7 +24,7 @@ from homeassistant.components.sensor import DOMAIN as SENSOR_DOMAIN
 from homeassistant.core import State
 from homeassistant.helpers import entity_registry as er
 
-from custom_components.sync_energy_ocpp.const import (
+from custom_components.syncenergy_ocpp.const import (
     CONF_CPID,
     CONF_CPIDS,
     CONF_NUM_CONNECTORS,
@@ -32,7 +32,7 @@ from custom_components.sync_energy_ocpp.const import (
     DOMAIN as OCPP_DOMAIN,
     sensor_unique_id,
 )
-from custom_components.sync_energy_ocpp.enums import HAChargerSession as csess
+from custom_components.syncenergy_ocpp.enums import HAChargerSession as csess
 
 from .charge_point_test import create_configuration, remove_configuration, wait_ready
 from .const import MOCK_CONFIG_CP_APPEND, MOCK_CONFIG_DATA

@@ -1,5 +1,5 @@
 {
-  "domain": "sync_energy_ocpp",
+  "domain": "syncenergy_ocpp",
   "name": "OCPP for Sync Energy chargers (BG SyncEV)",
   "after_dependencies": [
     "persistent_notification"
@@ -11,9 +11,9 @@
     "@jgogoes"
   ],
   "config_flow": true,
-  "documentation": "https://github.com/jgogoes/sync_energy_ocpp",
+  "documentation": "https://github.com/jgogoes/syncenergy_ocpp",
   "iot_class": "local_push",
-  "issue_tracker": "https://github.com/jgogoes/sync_energy_ocpp/issues",
+  "issue_tracker": "https://github.com/jgogoes/syncenergy_ocpp/issues",
   "requirements": [
     "ocpp>=2.1.0",
     "websockets>=14.1"

@@ -9,12 +9,12 @@ from homeassistant.core import HomeAssistant
 from homeassistant.helpers import device_registry
 from pytest_homeassistant_custom_component.common import MockConfigEntry
 
-from custom_components.sync_energy_ocpp import (
+from custom_components.syncenergy_ocpp import (
     CentralSystem,
     async_migrate_entry,
     async_remove_config_entry_device,
 )
-from custom_components.sync_energy_ocpp.const import (
+from custom_components.syncenergy_ocpp.const import (
     CONF_CHARGE_POINT_MAX_PROFILE_ABSOLUTE,
     CONF_CPID,
     CONF_CPIDS,
@@ -67,7 +67,7 @@ async def test_setup_unload_and_reload_entry(
 
     # Set up the entry and assert that the values set during setup are where we expect
     # them to be. Because we have patched the ocppDataUpdateCoordinator.async_get_data
-    # call, no code from custom_components/sync_energy_ocpp/api.py actually runs.
+    # call, no code from custom_components/syncenergy_ocpp/api.py actually runs.
     assert await hass.config_entries.async_setup(config_entry.entry_id)
     await hass.async_block_till_done()
     assert DOMAIN in hass.data
@@ -111,7 +111,7 @@ async def test_setup_unload_and_reload_entry_multiple_connectors(
 
     # Set up the entry and assert that the values set during setup are where we expect
     # them to be. Because we have patched the ocppDataUpdateCoordinator.async_get_data
-    # call, no code from custom_components/sync_energy_ocpp/api.py actually runs.
+    # call, no code from custom_components/syncenergy_ocpp/api.py actually runs.
     assert await hass.config_entries.async_setup(config_entry.entry_id)
     await hass.async_block_till_done()
     assert DOMAIN in hass.data
@@ -164,7 +164,7 @@ async def test_migration_entry(
 
     # Set up the entry and assert that the values set during setup are where we expect
     # them to be. Because we have patched the ocppDataUpdateCoordinator.async_get_data
-    # call, no code from custom_components/sync_energy_ocpp/api.py actually runs.
+    # call, no code from custom_components/syncenergy_ocpp/api.py actually runs.
     assert await hass.config_entries.async_setup(config_entry.entry_id)
     await hass.async_block_till_done()
     assert DOMAIN in hass.data

@@ -204,7 +204,7 @@ class ConfigFlow(ConfigFlow, domain=DOMAIN):
             data_schema=STEP_USER_CS_DATA_SCHEMA,
             errors=errors,
             description_placeholders={
-                "docs_url": "https://github.com/jgogoes/sync_energy_ocpp"
+                "docs_url": "https://github.com/jgogoes/syncenergy_ocpp"
             },
         )
 
@@ -237,7 +237,7 @@ class ConfigFlow(ConfigFlow, domain=DOMAIN):
                 return self.async_abort(
                     reason="legacy_unsupported",
                     description_placeholders={
-                        "issues_url": "https://github.com/jgogoes/sync_energy_ocpp/issues"
+                        "issues_url": "https://github.com/jgogoes/syncenergy_ocpp/issues"
                     },
                 )
             self._legacy_entry = entry
@@ -309,7 +309,7 @@ class ConfigFlow(ConfigFlow, domain=DOMAIN):
                 STEP_USER_CS_DATA_SCHEMA, entry.data
             ),
             description_placeholders={
-                "docs_url": "https://github.com/jgogoes/sync_energy_ocpp"
+                "docs_url": "https://github.com/jgogoes/syncenergy_ocpp"
             },
         )
 
@@ -406,7 +406,7 @@ class ConfigFlow(ConfigFlow, domain=DOMAIN):
             data_schema=STEP_USER_CP_DATA_SCHEMA,
             errors=errors,
             description_placeholders={
-                "docs_url": "https://github.com/jgogoes/sync_energy_ocpp"
+                "docs_url": "https://github.com/jgogoes/syncenergy_ocpp"
             },
         )
 

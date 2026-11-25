@@ -8,8 +8,8 @@ from pytest_homeassistant_custom_component.common import MockConfigEntry
 import pytest
 import websockets
 
-from custom_components.sync_energy_ocpp.api import CentralSystem
-from custom_components.sync_energy_ocpp.const import (
+from custom_components.syncenergy_ocpp.api import CentralSystem
+from custom_components.syncenergy_ocpp.const import (
     CONF_CPIDS,
     CONF_PORT,
     DOMAIN as OCPP_DOMAIN,
@@ -61,7 +61,7 @@ def skip_notifications_fixture():
     with (
         patch("homeassistant.components.persistent_notification.async_create"),
         patch("homeassistant.components.persistent_notification.async_dismiss"),
-        patch("custom_components.sync_energy_ocpp.chargepoint.ChargePoint.notify_ha"),
+        patch("custom_components.syncenergy_ocpp.chargepoint.ChargePoint.notify_ha"),
     ):
         yield
 
@@ -92,7 +92,7 @@ def bypass_get_data_fixture():
 def error_get_data_fixture():
     """Simulate error when retrieving data from API."""
     # with patch(
-    #    "custom_components.sync_energy_ocpp.ocppApiClient.async_get_data",
+    #    "custom_components.syncenergy_ocpp.ocppApiClient.async_get_data",
     #    side_effect=Exception,
     # ):
     yield

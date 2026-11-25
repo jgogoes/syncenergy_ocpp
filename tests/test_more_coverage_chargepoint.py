@@ -9,12 +9,12 @@ import websockets
 from websockets.protocol import State
 
 
-from custom_components.sync_energy_ocpp.chargepoint import (
+from custom_components.syncenergy_ocpp.chargepoint import (
     ChargePoint as BaseCP,
     MeasurandValue,
 )
-from custom_components.sync_energy_ocpp.ocppv16 import ChargePoint as CPv16
-from custom_components.sync_energy_ocpp.const import DEFAULT_MEASURAND
+from custom_components.syncenergy_ocpp.ocppv16 import ChargePoint as CPv16
+from custom_components.syncenergy_ocpp.const import DEFAULT_MEASURAND
 from unittest.mock import MagicMock, AsyncMock
 from ocpp.v16.enums import Measurand, Phase
 
@@ -94,7 +94,7 @@ async def test_handle_call_notimplemented_sends_call_error(
             srv = cs.charge_points[cp_id]
 
             # Patch the exact base alias used by the subclass, and raise the *OCPP* NotImplementedError.
-            import custom_components.sync_energy_ocpp.chargepoint as cp_mod
+            import custom_components.syncenergy_ocpp.chargepoint as cp_mod
             from ocpp.exceptions import NotImplementedError as OcppNotImplementedError
 
             async def boom(self, msg):
@@ -228,7 +228,7 @@ async def test_update_returns_early_when_root_device_missing(
             # patches must not outlive this block. Left installed (as they
             # were until HA 2026.8), core's config-entry teardown hits the
             # fakes and fails on registry surface they don't implement.
-            import custom_components.sync_energy_ocpp.chargepoint as mod
+            import custom_components.syncenergy_ocpp.chargepoint as mod
 
             class FakeDR:
                 """Fake DR: only what update()'s early-return path touches."""
@@ -331,7 +331,7 @@ async def test_update_traverses_children_and_skips_visited(
 
             # Build a tiny fake device graph:
             # root -> child (twice in the values() list to create a duplicate push)
-            import custom_components.sync_energy_ocpp.chargepoint as mod
+            import custom_components.syncenergy_ocpp.chargepoint as mod
 
             class Dev:
                 """Fake Dev."""
@@ -659,7 +659,7 @@ async def test_session_and_lifetime_eair_distinction(hass):
 @pytest.mark.asyncio
 async def test_process_phases_neutral_shield():
     """Test that isolated Neutral (N) phases do not overwrite main sensors with 0.0."""
-    from custom_components.sync_energy_ocpp.chargepoint import (
+    from custom_components.syncenergy_ocpp.chargepoint import (
         ChargePoint as BaseCP,
         MeasurandValue,
     )
@@ -779,7 +779,7 @@ async def test_update_real_registry_includes_child_device(
     from homeassistant.helpers import device_registry as dr, entity_registry as er
     from homeassistant.helpers.dispatcher import async_dispatcher_connect
 
-    from custom_components.sync_energy_ocpp.const import DATA_UPDATED, DOMAIN
+    from custom_components.syncenergy_ocpp.const import DATA_UPDATED, DOMAIN
 
     cs = setup_config_entry
     async with websockets.connect(

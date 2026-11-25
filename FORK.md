@@ -91,7 +91,7 @@ are both readable by name but absent from it. Assume other keys exist.
 
 ## Installing
 
-Copy `custom_components/sync_energy_ocpp/` into your Home Assistant `config/custom_components/`
+Copy `custom_components/syncenergy_ocpp/` into your Home Assistant `config/custom_components/`
 and restart. If your config share is SMB, note that deletes are often blocked —
 `cp -f` works where `rm` and `tar -x` do not.
 

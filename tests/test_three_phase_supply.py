@@ -12,7 +12,7 @@ from ocpp.v16 import call, call_result
 from ocpp.v16.enums import Action, ChargingProfileStatus, Phase
 from pytest_homeassistant_custom_component.common import MockConfigEntry
 
-from custom_components.sync_energy_ocpp.const import (
+from custom_components.syncenergy_ocpp.const import (
     CONF_CPIDS,
     CONF_PORT,
     CONF_THREE_PHASE_SUPPLY,

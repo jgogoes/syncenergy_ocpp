@@ -6,7 +6,7 @@ Generated 2026-08-10. **Target base: `v0.10.18` (latest stable).**
 
 | Fact | Value | How it was determined |
 |---|---|---|
-| Deployed integration | `/Volumes/config/custom_components/sync_energy_ocpp` | live HA config share |
+| Deployed integration | `/Volumes/config/custom_components/syncenergy_ocpp` | live HA config share |
 | Its actual base | **`v0.10.15`** (confirmed) | minimum diff across tags v0.10.12–v0.10.19b0: 995 changed lines vs v0.10.15, rising monotonically either side |
 | Custom work | 995 changed lines across 8 files | `diff -u` vs `git archive v0.10.15` |
 | Clean repo HEAD | `b0f11c9` = **`v0.10.18`** (stable, 2026-08-10) | `git describe --tags HEAD` |

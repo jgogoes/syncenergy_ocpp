@@ -31,7 +31,7 @@ If your charger reports more than one connector, the sensors below are created p
 When the OCPP integration is added to your Home Assistant, you get a slider to control the maximum charge current named:
 `number.<cpid>_maximum_current`
 
-The slider sets a ceiling for the entire charging station. On **OCPP 1.6** it sends only a `ChargePointMaxProfile` on connector 0. On **OCPP 2.0.1** it sends a `ChargingStationMaxProfile` on EVSE 0; at or above the configured maximum it clears profiles of that purpose instead. On 1.6, setting the slider to its maximum still sends a profile. A refused request is shown as an error and the slider returns to its last confirmed value, or unknown if there is none. There is no transaction-profile fallback in the slider. Chargers that reject the station profile can still use the `sync_energy_ocpp.set_charge_rate` action and its fallback chain, described below. For per-connector session control, use the action's `custom_profile` option as described below.
+The slider sets a ceiling for the entire charging station. On **OCPP 1.6** it sends only a `ChargePointMaxProfile` on connector 0. On **OCPP 2.0.1** it sends a `ChargingStationMaxProfile` on EVSE 0; at or above the configured maximum it clears profiles of that purpose instead. On 1.6, setting the slider to its maximum still sends a profile. A refused request is shown as an error and the slider returns to its last confirmed value, or unknown if there is none. There is no transaction-profile fallback in the slider. Chargers that reject the station profile can still use the `syncenergy_ocpp.set_charge_rate` action and its fallback chain, described below. For per-connector session control, use the action's `custom_profile` option as described below.
 
 While using this entity in an automation might seem logical, do not assume it is safe to update at control-loop frequency.
 OCPP defines the profile's behaviour, but not where a charger stores it. Some charger firmware persists station-wide profiles in non-volatile memory; other firmware does not. If a charger writes every update to EEPROM or flash, a fast control loop can wear that storage. There is no universal safe update rate or lifetime estimate: confirm the implementation and supported update frequency with the charger manufacturer.
@@ -42,9 +42,9 @@ OCPP defines the profile's behaviour, but not where a charger stores it. Some ch
 
 This is a breaking change for multi-connector chargers: the old `number.<cpid>_connector_N_maximum_current` entities are removed, including renamed or disabled entries, and replaced by one station-wide master. Update dashboards, scripts and automations that reference the old entities. Existing flat Maximum Current entities keep their registry identity, customisations and restored values. A newly created master starts at the configured maximum without treating a removed entity's value as confirmed; that initial display is not evidence of the charger's current limit.
 
-The slider-side fallback is also removed on **single-connector OCPP 1.6 chargers**. A charger that rejects `ChargePointMaxProfile` now reports an error on slider changes, even if a transaction profile previously worked. The `sync_energy_ocpp.set_charge_rate` action retains its existing behaviour.
+The slider-side fallback is also removed on **single-connector OCPP 1.6 chargers**. A charger that rejects `ChargePointMaxProfile` now reports an error on slider changes, even if a transaction profile previously worked. The `syncenergy_ocpp.set_charge_rate` action retains its existing behaviour.
 
-The upgrade does not clear stored charging profiles. Moving the master updates only the station maximum; existing transaction or default profiles may continue imposing lower limits. On 1.6, `sync_energy_ocpp.clear_profile` clears **all charging profiles, including custom profiles**. On 2.0.1 it clears **all profiles with purpose `ChargingStationMaxProfile`**, including any custom profiles of that purpose, and leaves transaction/default profiles in place.
+The upgrade does not clear stored charging profiles. Moving the master updates only the station maximum; existing transaction or default profiles may continue imposing lower limits. On 1.6, `syncenergy_ocpp.clear_profile` clears **all charging profiles, including custom profiles**. On 2.0.1 it clears **all profiles with purpose `ChargingStationMaxProfile`**, including any custom profiles of that purpose, and leaves transaction/default profiles in place.
 
 ### TxProfile
 
@@ -54,7 +54,7 @@ For session-scoped control, use a profile that is active exclusively during the 
 
 `Session Current Limit` is a number per connector that limits only the transaction the connector is running. It is available while the charger is connected with SmartCharging, the connector reads Charging or Suspended, and a transaction id is displayed for it; on OCPP 1.6 it is also withheld for the few seconds after a StopTransaction the integration could not attribute (#2128), until the charger's next report settles the connector. Its value is the last limit the charger accepted for the displayed transaction and nothing else: it starts unknown, it is not restored across a restart, and it goes back to unknown when the transaction id changes, because the charger discards a `TxProfile` when its transaction ends.
 
-Moving the slider sends one `SetChargingProfile`: a `TxProfile` of kind `Relative` bound to the displayed transaction id, at the stack level the charger reports as its maximum (`ChargeProfileMaxStackLevel` on 1.6, `SmartChargingCtrlr/ProfileStackLevel` on 2.0.1; see [Charging profile stack level](#charging-profile-stack-level)), in amps or, on a watt-only station, in watts using the voltage and phase count described below. It uses profile id `3000+n`, where `n` is the connector, the same id the `sync_energy_ocpp.set_charge_rate` action uses for its TxProfile leg on 1.6, so a connector has one session limit whichever way it is set. The maximum is a limit like any other: the same profile is sent with the maximum current, and nothing is cleared, because the charger discards the profile when the transaction ends. The slider moves while the request is in flight and returns to the last accepted value on anything but an Accepted reply, with the charger's status in the error.
+Moving the slider sends one `SetChargingProfile`: a `TxProfile` of kind `Relative` bound to the displayed transaction id, at the stack level the charger reports as its maximum (`ChargeProfileMaxStackLevel` on 1.6, `SmartChargingCtrlr/ProfileStackLevel` on 2.0.1; see [Charging profile stack level](#charging-profile-stack-level)), in amps or, on a watt-only station, in watts using the voltage and phase count described below. It uses profile id `3000+n`, where `n` is the connector, the same id the `syncenergy_ocpp.set_charge_rate` action uses for its TxProfile leg on 1.6, so a connector has one session limit whichever way it is set. The maximum is a limit like any other: the same profile is sent with the maximum current, and nothing is cleared, because the charger discards the profile when the transaction ends. The slider moves while the request is in flight and returns to the last accepted value on anything but an Accepted reply, with the charger's status in the error.
 
 What this control does not do, so that automations do not assume it:
 
@@ -66,7 +66,7 @@ What this control does not do, so that automations do not assume it:
 
 ### Charging profile stack level
 
-Every charging profile the integration manages (the station-wide maximum, `TxProfile` and `TxDefaultProfile`) is sent at the maximum stack level the charger reports: `ChargeProfileMaxStackLevel` on 1.6, `SmartChargingCtrlr/ProfileStackLevel` on 2.0.1. The 2.0.1 `ChargingStationMaxProfile` is the exception and uses level 0. Profiles passed to `sync_energy_ocpp.set_charge_rate` as `custom_profile` keep their own stack level. On 1.6 a new profile replaces any existing one with the same purpose and stack level, so a custom `TxDefaultProfile` at the level the integration uses is overwritten when the integration sets a default limit on that connector; put custom profiles at a lower level.
+Every charging profile the integration manages (the station-wide maximum, `TxProfile` and `TxDefaultProfile`) is sent at the maximum stack level the charger reports: `ChargeProfileMaxStackLevel` on 1.6, `SmartChargingCtrlr/ProfileStackLevel` on 2.0.1. The 2.0.1 `ChargingStationMaxProfile` is the exception and uses level 0. Profiles passed to `syncenergy_ocpp.set_charge_rate` as `custom_profile` keep their own stack level. On 1.6 a new profile replaces any existing one with the same purpose and stack level, so a custom `TxDefaultProfile` at the level the integration uses is overwritten when the integration sets a default limit on that connector; put custom profiles at a lower level.
 
 OCPP 1.6 describes `ChargeProfileMaxStackLevel` both as the highest level and as the number of levels. Some chargers take it as the number, so they reject every profile at the value they report (Timxon A0 and Morek MEV11 report 5 and accept up to 4; ABB Terra AC reports 3 and accepts up to 2). For those, enable **Charger accepts only stack levels below its reported maximum** in the charge point's options (Settings -> Devices & Services -> OCPP -> configure the charger). Every managed profile is then sent one level lower, never below 0. OCPP 2.0.1 defines the value unambiguously, so the option has no effect there.
 
@@ -83,22 +83,22 @@ On 1.6 the integration reads `ChargeProfileMaxStackLevel` and `ChargingScheduleA
 Upgrade notes:
 
 * Earlier releases sent the 1.6 `TxDefaultProfile`, and the default-profile session limit below, one level below the reported maximum. That happened to work around the chargers above. Now every managed profile uses the same level, so on those chargers enable the option.
-* After enabling or disabling the option, set each limit once. The managed profiles keep their ids (`1000`, `2000+n`, `3000+n`), so each new profile replaces the one left at the old level. There is no need for `sync_energy_ocpp.clear_profile`, which on 1.6 also removes custom and vendor profiles.
+* After enabling or disabling the option, set each limit once. The managed profiles keep their ids (`1000`, `2000+n`, `3000+n`), so each new profile replaces the one left at the old level. There is no need for `syncenergy_ocpp.clear_profile`, which on 1.6 also removes custom and vendor profiles.
 * Disable the option before installing release 0.12.0 or older. Those releases fail to start a charger whose configuration has a setting they do not know. Release 0.12.1 and later ignore it. The option is stored only while it is enabled, so a charger that never used it is unaffected.
 
 ### Session Current Limit as a default profile
 
 Some chargers refuse both the station-wide `ChargePointMaxProfile` and a transaction-bound `TxProfile`, but accept a `TxDefaultProfile` on the connector and apply it to the running transaction too (#2158: Timxon A0, ABB Terra AC, Morek MEV11). Those three reject profiles at their reported maximum stack level, so try the [stack level option](#charging-profile-stack-level) first. For chargers that still need it, enable **Send Session Current Limit as a default profile** in the charge point's options. The option changes only how `Session Current Limit` works:
 
-* Moving the slider sends one `SetChargingProfile`: a `TxDefaultProfile` of kind `Relative` with no transaction id, on the slider's connector (1.6) or on that connector's EVSE (2.0.1). It uses profile id `2000+n`, where `n` is the connector, at the same stack level as the `TxProfile` (see [Charging profile stack level](#charging-profile-stack-level)). On 1.6 that is the same profile id and stack level the `sync_energy_ocpp.set_charge_rate` action uses for its `TxDefaultProfile` leg, so the action and the slider overwrite each other, and the slider does not learn of a value the action set.
+* Moving the slider sends one `SetChargingProfile`: a `TxDefaultProfile` of kind `Relative` with no transaction id, on the slider's connector (1.6) or on that connector's EVSE (2.0.1). It uses profile id `2000+n`, where `n` is the connector, at the same stack level as the `TxProfile` (see [Charging profile stack level](#charging-profile-stack-level)). On 1.6 that is the same profile id and stack level the `syncenergy_ocpp.set_charge_rate` action uses for its `TxDefaultProfile` leg, so the action and the slider overwrite each other, and the slider does not learn of a value the action set.
 * The slider is available whenever the charger is connected with SmartCharging, whether or not a transaction is running. On 2.0.1 it also waits until the charger has reported which EVSE the connector is on, so a profile that outlives the request is never sent to a guessed EVSE. Its value is the last limit the charger accepted for the connector. It is kept across transactions and restored after a restart, because the charger keeps the profile. A value left over from before the option was enabled is not restored.
-* The profile stays on the charger after the option is turned off. To lift it, set the slider to the maximum before turning the option off. On 1.6, `sync_energy_ocpp.clear_profile` also removes it, together with every other profile on the charger. On 2.0.1 it does not: that action clears only the station-wide `ChargingStationMaxProfile`, so raise the slider first.
+* The profile stays on the charger after the option is turned off. To lift it, set the slider to the maximum before turning the option off. On 1.6, `syncenergy_ocpp.clear_profile` also removes it, together with every other profile on the charger. On 2.0.1 it does not: that action clears only the station-wide `ChargingStationMaxProfile`, so raise the slider first.
 * On a 2.0.1 charger with more than one connector on an EVSE, the connectors' sliders target the same EVSE with different profile ids at the same stack level. OCPP 2.0.1 forbids that combination (K01.FR.06), so expect the charger to reject the second connector's limit. One connector per EVSE, the usual layout, is unaffected.
 * Turn the option off before installing an older release of the integration. Releases before it do not know the setting, and fail to start a charger whose configuration has it switched on. A charger that never had it on stores nothing, so it is unaffected.
 
 Essentially, the slider in your GUI maintains control over the absolute maximum current the charger can utilize.
 
-### What `sync_energy_ocpp.set_charge_rate` does with `limit_amps`
+### What `syncenergy_ocpp.set_charge_rate` does with `limit_amps`
 
 Before writing a profile by hand it is worth knowing what the built-in action does, because it is not simply a session-scoped limit.
 
@@ -109,7 +109,7 @@ So on a charger that accepts the station-wide profile, calling this on a short i
 On **OCPP 2.0.1** a limit below the maximum writes a `ChargingStationMaxProfile` to EVSE 0, as the specification requires for a station-wide profile. A limit at or above the configured maximum current, or 22 kW for a watt limit, or a call with no limit at all, clears that profile instead of sending one. There is no TxProfile fallback, and `conn_id` is not used for this managed limit — it only selects the EVSE for a `custom_profile`.
 
 ```yaml
-- action: sync_energy_ocpp.set_charge_rate
+- action: syncenergy_ocpp.set_charge_rate
   data:
     devid: <cpid>
     conn_id: 0
@@ -150,7 +150,7 @@ The snippets show only the action. `charge_current` is whatever your automation 
 #### OCPP 1.6
 
 ```yaml
-- action: sync_energy_ocpp.set_charge_rate
+- action: syncenergy_ocpp.set_charge_rate
   data:
     devid: <cpid>
     conn_id: 1
@@ -174,7 +174,7 @@ On 2.0.1 the profile id field is `id` (not `chargingProfileId`), `chargingSchedu
 Home Assistant normally converts a template containing only `"0"` to the number `0`. Because `"0"` is a valid string transaction id on 2.0.1, this example renders the complete mapping in one expression. That preserves the transaction id as a string while still delivering a dictionary, rather than a JSON string, to the integration. The charger-originated id is a dictionary value and cannot add or replace profile fields.
 
 ```yaml
-- action: sync_energy_ocpp.set_charge_rate
+- action: syncenergy_ocpp.set_charge_rate
   data:
     devid: <cpid>
     conn_id: 1
@@ -200,10 +200,10 @@ Home Assistant normally converts a template containing only `"0"` to the number 
 
 The profiles above request a limit in amps (`"chargingRateUnit": "A"`). Not every charger accepts that: some are power-only and want watts. The integration negotiates this for the limits it sends itself, but a **custom profile is forwarded exactly as you wrote it**, so an unsupported unit is simply rejected.
 
-Ask the charger rather than assuming. `sync_energy_ocpp.get_configuration` answers with a response rather than changing anything, so the easiest place to run it is **Developer Tools → Actions**, which shows you the result. In an automation a response-only action must be given a `response_variable`, or Home Assistant refuses it:
+Ask the charger rather than assuming. `syncenergy_ocpp.get_configuration` answers with a response rather than changing anything, so the easiest place to run it is **Developer Tools → Actions**, which shows you the result. In an automation a response-only action must be given a `response_variable`, or Home Assistant refuses it:
 
 ```yaml
-- action: sync_energy_ocpp.get_configuration
+- action: syncenergy_ocpp.get_configuration
   data:
     devid: <cpid>
     ocpp_key: ChargingScheduleAllowedChargingRateUnit
@@ -246,7 +246,7 @@ condition:
 `transactionId` only means something for a `TxProfile`. To limit **future** sessions, send a `TxDefaultProfile` with no transaction binding at all — do not take the profile above and change only the purpose, as the leftover `transactionId` can get the profile rejected:
 
 ```yaml
-- action: sync_energy_ocpp.set_charge_rate
+- action: syncenergy_ocpp.set_charge_rate
   data:
     devid: <cpid>
     conn_id: 1

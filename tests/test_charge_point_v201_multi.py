@@ -7,11 +7,11 @@ from datetime import datetime, UTC
 import pytest
 from pytest_homeassistant_custom_component.common import MockConfigEntry
 
-from custom_components.sync_energy_ocpp.const import CONF_CPIDS, CONF_CPID
-from custom_components.sync_energy_ocpp.const import (
+from custom_components.syncenergy_ocpp.const import CONF_CPIDS, CONF_CPID
+from custom_components.syncenergy_ocpp.const import (
     DOMAIN as OCPP_DOMAIN,
 )
-from custom_components.sync_energy_ocpp.enums import (
+from custom_components.syncenergy_ocpp.enums import (
     HAChargerServices as csvcs,
 )
 import ocpp

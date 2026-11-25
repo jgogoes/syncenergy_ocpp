@@ -45,12 +45,12 @@ max: 10
 
 ### unstable behavior when setting the charger maximum current
 
-If your charger is acting strange when you're changing the maximum current, or sending an sync_energy_ocpp.set_charge_rate action, it might help to clear the charging profiles from the charger.
+If your charger is acting strange when you're changing the maximum current, or sending an syncenergy_ocpp.set_charge_rate action, it might help to clear the charging profiles from the charger.
 
 Run the following action (from Developer Tools):
 
 ```
-    - action: sync_energy_ocpp.clear_profile
+    - action: syncenergy_ocpp.clear_profile
       data:
         devid: charger
 ```

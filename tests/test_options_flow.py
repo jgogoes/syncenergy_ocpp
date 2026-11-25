@@ -18,7 +18,7 @@ import pytest
 from pytest_homeassistant_custom_component.common import MockConfigEntry
 from homeassistant import data_entry_flow
 
-from custom_components.sync_energy_ocpp.const import (
+from custom_components.syncenergy_ocpp.const import (
     CONF_CHARGE_POINT_MAX_PROFILE_ABSOLUTE,
     CONF_CPID,
     CONF_CPIDS,
@@ -44,10 +44,8 @@ from .const import MOCK_CONFIG_CS, MOCK_CONFIG_CP
 def bypass_setup_fixture():
     """Prevent actual setup of the integration."""
     with (
-        patch("custom_components.sync_energy_ocpp.async_setup", return_value=True),
-        patch(
-            "custom_components.sync_energy_ocpp.async_setup_entry", return_value=True
-        ),
+        patch("custom_components.syncenergy_ocpp.async_setup", return_value=True),
+        patch("custom_components.syncenergy_ocpp.async_setup_entry", return_value=True),
     ):
         yield
 
