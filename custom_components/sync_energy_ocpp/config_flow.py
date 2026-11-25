@@ -252,8 +252,12 @@ class ConfigFlow(ConfigFlow, domain=DOMAIN):
             data_schema=vol.Schema({vol.Required("import", default=True): bool}),
             description_placeholders={
                 "title": entry.title,
+                # The charger names (cpid), not the charge point ids: those are
+                # often the serial number, and users share screenshots.
                 "chargers": ", ".join(
-                    cp_id for item in entry.data.get(CONF_CPIDS, []) for cp_id in item
+                    str(settings.get(CONF_CPID, "charger"))
+                    for item in entry.data.get(CONF_CPIDS, [])
+                    for settings in item.values()
                 )
                 or "-",
             },

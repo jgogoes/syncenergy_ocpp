@@ -312,3 +312,112 @@ async def test_device_diagnostics_match_the_entry_report(hass):
     assert await async_get_device_diagnostics(
         hass, entry, MagicMock()
     ) == await async_get_config_entry_diagnostics(hass, entry)
+
+
+# --- End to end: a Sync charger that reconnects without rebooting -----------
+#
+# Found on a real Home Assistant (2.0.0b1 test): a charger that reconnects
+# without rebooting sends no BootNotification on its own, so the vendor is not
+# known when the connection setup checks the Sync keys. The check must run
+# after the BootNotification the setup asks for, or when one arrives later.
+
+import asyncio  # noqa: E402
+import contextlib  # noqa: E402
+
+import websockets  # noqa: E402
+from ocpp.routing import after, on  # noqa: E402
+from ocpp.v16 import call as v16call, call_result as v16result  # noqa: E402
+from ocpp.v16.enums import Action, RegistrationStatus  # noqa: E402
+
+from .charge_point_test import wait_ready  # noqa: E402
+from .test_charge_point_v16 import ChargePoint as SimCharger  # noqa: E402
+
+
+class _SyncChargerNoBoot(SimCharger):
+    """Answers the Sync keys and sends a BootNotification only when asked."""
+
+    @on(Action.get_configuration)
+    def on_get_configuration(self, key, **kwargs):
+        if key and key[0] in SYNCEV_VENDOR_KEYS:
+            return v16result.GetConfiguration(
+                configuration_key=[{"key": key[0], "readonly": False, "value": "1"}]
+            )
+        return SimCharger.on_get_configuration(self, key, **kwargs)
+
+    @after(Action.trigger_message)
+    async def after_trigger_message(self, requested_message, **kwargs):
+        if requested_message == "BootNotification":
+            resp = await self.call(
+                v16call.BootNotification(
+                    charge_point_model="EVSC7S", charge_point_vendor="Sync Energy"
+                )
+            )
+            assert resp.status == RegistrationStatus.accepted
+
+
+@pytest.mark.timeout(60)
+@pytest.mark.parametrize(
+    "setup_config_entry",
+    [{"port": 9471, "cp_id": "CP_sync_noboot", "cms": "cms_sync_noboot"}],
+    indirect=True,
+)
+@pytest.mark.parametrize("cp_id", ["CP_sync_noboot"])
+@pytest.mark.parametrize("port", [9471])
+async def test_sync_keys_found_when_charger_reconnects_without_boot(
+    hass, socket_enabled, cp_id, port, setup_config_entry
+):
+    """The Sync keys are found although no BootNotification came first."""
+    cs = setup_config_entry
+    async with websockets.connect(
+        f"ws://127.0.0.1:{port}/{cp_id}", subprotocols=["ocpp1.6"]
+    ) as ws:
+        client = _SyncChargerNoBoot(f"{cp_id}_client", ws)
+        task = asyncio.create_task(client.start())
+        try:
+            # No BootNotification from the charger: it only answers requests.
+            while cp_id not in cs.charge_points:
+                await asyncio.sleep(0.05)
+            server = cs.charge_points[cp_id]
+            await asyncio.wait_for(wait_ready(server), timeout=30)
+            for _ in range(100):
+                if server.vendor_keys:
+                    break
+                await asyncio.sleep(0.1)
+            assert server.is_sync_charger is True
+            assert server.vendor_keys == set(SYNCEV_VENDOR_KEYS)
+        finally:
+            task.cancel()
+            with contextlib.suppress(asyncio.CancelledError):
+                await task
+            await ws.close()
+
+
+async def test_late_boot_notification_runs_the_key_check():
+    """A BootNotification after setup checks the keys of a Sync charger once."""
+    cp = _charge_point()
+
+    async def store_info(info):
+        cp._metrics[(0, cdet.vendor.value)] = _metric(info["charge_point_vendor"])
+
+    cp.async_update_device_info_v16 = store_info
+    cp.run_vendor_probe = AsyncMock()
+
+    await cp._device_info_then_vendor_probe({"charge_point_vendor": "Sync Energy"})
+    cp.run_vendor_probe.assert_awaited_once()
+
+    # Keys already found: a later BootNotification does not ask again.
+    cp.run_vendor_probe.reset_mock()
+    cp.vendor_keys = {"LightIntensity"}
+    await cp._device_info_then_vendor_probe({"charge_point_vendor": "Sync Energy"})
+    cp.run_vendor_probe.assert_not_awaited()
+
+    # A non-Sync charger is never asked.
+    other = _charge_point()
+
+    async def other_info(info):
+        other._metrics[(0, cdet.vendor.value)] = _metric("Wallbox")
+
+    other.async_update_device_info_v16 = other_info
+    other.run_vendor_probe = AsyncMock()
+    await other._device_info_then_vendor_probe({"charge_point_vendor": "Wallbox"})
+    other.run_vendor_probe.assert_not_awaited()

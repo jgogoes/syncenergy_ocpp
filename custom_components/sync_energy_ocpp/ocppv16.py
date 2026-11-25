@@ -1964,9 +1964,20 @@ class ChargePoint(cp):
         _LOGGER.debug("Received boot notification for %s: %s", self.id, kwargs)
 
         self._ensure_tx_store_loaded()
-        self.hass.async_create_task(self.async_update_device_info_v16(kwargs))
+        self.hass.async_create_task(self._device_info_then_vendor_probe(kwargs))
         self._register_boot_notification()
         return resp
+
+    async def _device_info_then_vendor_probe(self, boot_info: dict):
+        """Store the BootNotification details, then check the Sync keys.
+
+        BG Sync fork: the vendor and model arrive with the BootNotification. A
+        Sync charger whose keys were not found yet (for example because the
+        connect-time check ran before the vendor was known) is checked now.
+        """
+        await self.async_update_device_info_v16(boot_info)
+        if self.is_sync_charger and not getattr(self, "vendor_keys", set()):
+            await self.run_vendor_probe()
 
     @on(Action.status_notification)
     def on_status_notification(self, connector_id, error_code, status, **kwargs):

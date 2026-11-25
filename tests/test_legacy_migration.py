@@ -199,7 +199,9 @@ async def test_import_keeps_entity_ids_history_and_survives_old_entry_delete(
     result = await _start_flow(hass)
     assert result["type"] == data_entry_flow.FlowResultType.FORM
     assert result["step_id"] == "import_legacy"
-    assert CP_ID in result["description_placeholders"]["chargers"]
+    # The charger name is shown, never the charge point id (often the serial).
+    assert result["description_placeholders"]["chargers"] == CPID
+    assert CP_ID not in result["description_placeholders"]["chargers"]
 
     result = await hass.config_entries.flow.async_configure(
         result["flow_id"], user_input={"import": True}

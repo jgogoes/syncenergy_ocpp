@@ -473,20 +473,6 @@ class ChargePoint(cp):
                     ex,
                 )
 
-            # BG Sync fork: find the Sync-specific keys this charger has, so
-            # their entities are offered only where they work. Non-fatal for
-            # the same reason as set_standard_configuration above.
-            try:
-                await self.apply_vendor_configuration()
-            except asyncio.CancelledError:
-                raise
-            except Exception as ex:
-                _LOGGER.debug(
-                    "post_connect: apply_vendor_configuration failed non-fatally: %s",
-                    ex,
-                )
-            async_dispatcher_send(self.hass, DATA_UPDATED)
-
             self.post_connect_success = True
             _LOGGER.debug("'%s' post connection setup completed successfully", self.id)
 
@@ -527,6 +513,14 @@ class ChargePoint(cp):
                     )
                 except Exception as ex:
                     _LOGGER.debug("trigger_status_notification ignored: %s", ex)
+
+            # BG Sync fork: find the Sync-specific keys this charger has, so
+            # their entities are offered only where they work. This runs after
+            # the BootNotification trigger above: the vendor arrives with that
+            # message, and a charger that reconnects without rebooting sends
+            # none on its own. A BootNotification that arrives later runs the
+            # check again (see on_boot_notification).
+            await self.run_vendor_probe()
 
             # Ensure HA states are correct immediately after connection
             self.hass.async_create_task(self.update(self.settings.cpid))
@@ -1011,6 +1005,16 @@ class ChargePoint(cp):
         Overridden per OCPP version. The base charger has none.
         """
         self.vendor_keys = set()
+
+    async def run_vendor_probe(self):
+        """Run apply_vendor_configuration, non-fatally, then refresh entities."""
+        try:
+            await self.apply_vendor_configuration()
+        except asyncio.CancelledError:
+            raise
+        except Exception as ex:
+            _LOGGER.debug("'%s' Sync vendor key check failed: %s", self.id, ex)
+        async_dispatcher_send(self.hass, DATA_UPDATED)
 
     @property
     def requires_abrupt_disconnect(self) -> bool:
