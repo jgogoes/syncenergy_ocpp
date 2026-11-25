@@ -234,7 +234,12 @@ class ConfigFlow(ConfigFlow, domain=DOMAIN):
             if (entry.version, entry.minor_version) < LEGACY_VERSION:
                 return self.async_abort(reason="legacy_outdated")
             if (entry.version, entry.minor_version) > LEGACY_VERSION:
-                return self.async_abort(reason="legacy_unsupported")
+                return self.async_abort(
+                    reason="legacy_unsupported",
+                    description_placeholders={
+                        "issues_url": "https://github.com/jgogoes/sync_energy_ocpp/issues"
+                    },
+                )
             self._legacy_entry = entry
             return self.async_show_form(
                 step_id="import_legacy",

@@ -4,6 +4,9 @@
   "after_dependencies": [
     "persistent_notification"
   ],
+  "categories": [
+    "energy.ev_charging"
+  ],
   "codeowners": [
     "@jgogoes"
   ],

@@ -287,6 +287,7 @@ async def test_flow_refuses_an_old_entry_newer_than_supported(hass):
 
     assert result["type"] == data_entry_flow.FlowResultType.ABORT
     assert result["reason"] == "legacy_unsupported"
+    assert result["description_placeholders"]["issues_url"].endswith("/issues")
 
 
 async def test_flow_refuses_an_outdated_old_entry(hass):

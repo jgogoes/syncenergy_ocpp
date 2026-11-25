@@ -111,7 +111,7 @@
             "reconfigure_successful": "Configuration updated",
             "legacy_active": "The old OCPP integration is still enabled. Both use the same websocket port, so they cannot run together. Disable the old OCPP entry first (Settings > Devices & services > OCPP > three dots > Disable), then add this integration again.",
             "legacy_outdated": "The old OCPP setup was made by an older version. Update the old OCPP integration to its latest version and restart Home Assistant, then disable it and add this integration again.",
-            "legacy_unsupported": "The old OCPP setup was saved by a newer version of the OCPP integration than this import supports. Please open an issue at https://github.com/jgogoes/sync_energy_ocpp/issues, or set up this integration by hand."
+            "legacy_unsupported": "The old OCPP setup was saved by a newer version of the OCPP integration than this import supports. Please open an issue at {issues_url}, or set up this integration by hand."
         }
     },
     "exceptions": {
