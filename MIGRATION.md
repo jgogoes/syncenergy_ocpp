@@ -36,14 +36,22 @@ The guided import was tested in the Home Assistant test environment
 
 ## Steps
 
+Version 2.0.0 lives in a new repository,
+[jgogoes/sync_energy_ocpp](https://github.com/jgogoes/sync_energy_ocpp).
+You install it next to the old integration and keep the old one until the
+new one works. The old integration is only removed at the end.
+
 The two integrations use the same websocket port, so they must never run at
 the same time. Do the steps in this order.
 
 1. **Back up Home Assistant.** Settings → System → Backups.
-2. **Update the old integration** to its latest version, and restart. The
-   import accepts only a setup saved by a current version.
-3. **Install the new integration** from HACS (see the README), but do not
-   add it yet.
+2. **Update the old integration** to its latest version (1.2.0), and
+   restart. The import accepts only a setup saved by a current version.
+3. **Install the new integration.** In the Marketplace (or HACS), add the
+   repository `https://github.com/jgogoes/sync_energy_ocpp` as a custom
+   repository of type **Integration** (not needed once it is listed in the
+   Marketplace), then download **OCPP for Sync Energy chargers**. Do not add
+   it in Devices & services yet.
 4. **Check the configuration, then restart Home Assistant.** For example
    with `ha core check` before the restart.
 5. **Disable the old integration.** Settings → Devices & services → OCPP →
@@ -57,8 +65,13 @@ the same time. Do the steps in this order.
 7. **Check that the charger reconnects.** The port and path are unchanged,
    so nothing changes on the charger.
 8. **Update your automations** (see above).
-9. **Remove the old setup.** Delete the disabled OCPP entry, then remove the
-   old integration in HACS. Your moved devices and entities stay.
+9. **Remove the old setup.** Delete the disabled OCPP entry, then remove
+   **OCPP - BG Sync EV** in the Marketplace. Your moved devices and entities
+   stay with the new integration.
+
+Do not use the Marketplace's **Delete and uninstall** on the old
+integration before step 6: it deletes the old setup, and then there is
+nothing left to import.
 
 ## If something goes wrong
 
@@ -66,6 +79,6 @@ the same time. Do the steps in this order.
   Do not just delete the new entry: the import moved the devices and
   entities to it, so deleting it deletes them.
 - Please report problems in the
-  [issue tracker](https://github.com/jgogoes/hass_ocpp_bg_sync_ev/issues),
+  [issue tracker](https://github.com/jgogoes/sync_energy_ocpp/issues),
   with the diagnostics file (device page → three dots → **Download
   diagnostics**).

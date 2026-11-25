@@ -204,7 +204,7 @@ class ConfigFlow(ConfigFlow, domain=DOMAIN):
             data_schema=STEP_USER_CS_DATA_SCHEMA,
             errors=errors,
             description_placeholders={
-                "docs_url": "https://github.com/jgogoes/hass_ocpp_bg_sync_ev"
+                "docs_url": "https://github.com/jgogoes/sync_energy_ocpp"
             },
         )
 
@@ -293,7 +293,7 @@ class ConfigFlow(ConfigFlow, domain=DOMAIN):
                 STEP_USER_CS_DATA_SCHEMA, entry.data
             ),
             description_placeholders={
-                "docs_url": "https://github.com/jgogoes/hass_ocpp_bg_sync_ev"
+                "docs_url": "https://github.com/jgogoes/sync_energy_ocpp"
             },
         )
 
@@ -390,7 +390,7 @@ class ConfigFlow(ConfigFlow, domain=DOMAIN):
             data_schema=STEP_USER_CP_DATA_SCHEMA,
             errors=errors,
             description_placeholders={
-                "docs_url": "https://github.com/jgogoes/hass_ocpp_bg_sync_ev"
+                "docs_url": "https://github.com/jgogoes/sync_energy_ocpp"
             },
         )
 
