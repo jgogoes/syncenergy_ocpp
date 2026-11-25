@@ -269,6 +269,28 @@ async def test_import_keeps_entity_ids_history_and_survives_old_entry_delete(
     await hass.async_block_till_done()
 
 
+async def test_rereading_the_open_import_form_does_not_decline_it(hass, socket_enabled):
+    """A client that re-reads an open flow (no answer) must see the same form.
+
+    Found on a real Home Assistant: a tool re-read the form before submitting,
+    the step took "no answer" as "do not import", and jumped to manual setup.
+    """
+    _legacy_entry(hass)
+
+    result = await _start_flow(hass)
+    reread = await hass.config_entries.flow.async_configure(result["flow_id"])
+    assert reread["type"] == data_entry_flow.FlowResultType.FORM
+    assert reread["step_id"] == "import_legacy"
+
+    result = await hass.config_entries.flow.async_configure(
+        result["flow_id"], user_input={"import": True}
+    )
+    assert result["type"] == data_entry_flow.FlowResultType.CREATE_ENTRY
+    await hass.async_block_till_done()
+    assert await hass.config_entries.async_unload(result["result"].entry_id)
+    await hass.async_block_till_done()
+
+
 async def test_flow_refuses_while_old_integration_is_enabled(hass):
     """Both integrations must never bind the port together."""
     _legacy_entry(hass, disabled=False)

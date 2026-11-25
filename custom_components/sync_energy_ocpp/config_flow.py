@@ -241,24 +241,31 @@ class ConfigFlow(ConfigFlow, domain=DOMAIN):
                     },
                 )
             self._legacy_entry = entry
-            return self.async_show_form(
-                step_id="import_legacy",
-                data_schema=vol.Schema({vol.Required("import", default=True): bool}),
-                description_placeholders={
-                    "title": entry.title,
-                    "chargers": ", ".join(
-                        cp_id
-                        for item in entry.data.get(CONF_CPIDS, [])
-                        for cp_id in item
-                    )
-                    or "-",
-                },
-            )
+            return self._show_import_form()
         return None
+
+    def _show_import_form(self) -> ConfigFlowResult:
+        """Show the offer to import the disabled old entry."""
+        entry = self._legacy_entry
+        return self.async_show_form(
+            step_id="import_legacy",
+            data_schema=vol.Schema({vol.Required("import", default=True): bool}),
+            description_placeholders={
+                "title": entry.title,
+                "chargers": ", ".join(
+                    cp_id for item in entry.data.get(CONF_CPIDS, []) for cp_id in item
+                )
+                or "-",
+            },
+        )
 
     async def async_step_import_legacy(self, user_input=None) -> ConfigFlowResult:
         """Copy the disabled old entry's settings into a new entry."""
-        if not user_input or not user_input.get("import"):
+        # No answer means the form is being shown again (for example when a
+        # client re-reads an open flow): show it again, never take it as "no".
+        if user_input is None:
+            return self._show_import_form()
+        if not user_input.get("import"):
             self._skip_legacy = True
             return await self.async_step_user()
         legacy = self._legacy_entry
