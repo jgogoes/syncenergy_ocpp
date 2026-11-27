@@ -361,3 +361,39 @@ async def test_an_imported_old_entry_is_not_offered_again(hass):
     result = await _start_flow(hass)
 
     assert result["step_id"] == "user"
+
+
+async def test_offers_the_old_entry_that_still_owns_the_entities(hass, socket_enabled):
+    """Two disabled old entries: offer the one that still has the entities.
+
+    Found on a real Home Assistant: after a move to an early sync_energy_ocpp
+    build, the original "ocpp" entry (now empty) was still there, disabled,
+    and was offered first. Importing it would have left the charger's
+    entities behind on the other old entry.
+    """
+    _legacy_entry(hass, domain=LEGACY_DOMAIN)
+    owner = _legacy_entry(hass, domain="sync_energy_ocpp")
+    _register_legacy_objects(hass, owner)
+
+    result = await _start_flow(hass)
+    assert result["step_id"] == "import_legacy"
+    result = await hass.config_entries.flow.async_configure(
+        result["flow_id"], user_input={"import": True}
+    )
+    assert result["type"] == data_entry_flow.FlowResultType.CREATE_ENTRY
+    await hass.async_block_till_done()
+
+    new_entry = result["result"]
+    ent_reg = er.async_get(hass)
+    sensor = ent_reg.async_get(SENSOR_ENTITY_ID)
+    assert sensor is not None
+    assert sensor.config_entry_id == new_entry.entry_id
+    assert sensor.platform == DOMAIN
+    assert not er.async_entries_for_config_entry(ent_reg, owner.entry_id)
+
+    # The empty "ocpp" entry is on the same port, so it is not offered again.
+    again = await _start_flow(hass)
+    assert again["step_id"] == "user"
+
+    assert await hass.config_entries.async_unload(new_entry.entry_id)
+    await hass.async_block_till_done()

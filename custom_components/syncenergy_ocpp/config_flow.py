@@ -9,7 +9,7 @@ from homeassistant.config_entries import (
     OptionsFlow,
 )
 from homeassistant.core import callback
-from homeassistant.helpers import config_validation as cv
+from homeassistant.helpers import config_validation as cv, entity_registry as er
 import voluptuous as vol
 
 from .legacy import CONF_IMPORTED_FROM, LEGACY_VERSION, legacy_entries
@@ -228,6 +228,17 @@ class ConfigFlow(ConfigFlow, domain=DOMAIN):
             entry.data.get(CONF_PORT)
             for entry in self._async_current_entries(include_ignore=False)
         }
+        # More than one old entry can be there: someone who tried the early
+        # "sync_energy_ocpp" builds has the original "ocpp" entry as well, but
+        # its entities have already moved on. Offer the one that still owns
+        # the charger's entities first.
+        ent_reg = er.async_get(self.hass)
+        legacy.sort(
+            key=lambda entry: len(
+                er.async_entries_for_config_entry(ent_reg, entry.entry_id)
+            ),
+            reverse=True,
+        )
         for entry in legacy:
             if entry.entry_id in imported or entry.data.get(CONF_PORT) in ports:
                 continue
